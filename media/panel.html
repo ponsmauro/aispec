@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSP is injected by the extension by replacing {{cspSource}} and {{nonce}} -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; img-src {{cspSource}} https: data:; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}';"
+  />
+
+  <title>AIScpec — Feature Planner</title>
+  <style>
+    /* ── Page / VS Code chrome ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .vsc-window {
+      width: 780px;
+      height: 680px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vsc-titlebar {
+      height: 30px;
+      background: #323233;
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 8px; flex-shrink: 0;
+    }
+    .vsc-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .vsc-dot.red    { background: #ff5f57; }
+    .vsc-dot.yellow { background: #ffbd2e; }
+    .vsc-dot.green  { background: #28c840; }
+    .vsc-title { flex: 1; text-align: center; font-size: 11px; color: #aaa; letter-spacing: .2px; }
+
+    .vsc-body { flex: 1; display: flex; overflow: hidden; }
+
+    .vsc-activity {
+      width: 46px; background: #333; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 8px; gap: 4px; border-right: 1px solid #252525;
+    }
+    .act-icon {
+      width: 36px; height: 36px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #858585; transition: color .1s;
+    }
+    .act-icon:hover { color: #ccc; }
+    .act-icon.active { color: #fff; border-left: 2px solid #fff; }
+
+    .vsc-sidebar {
+      width: 300px; flex-shrink: 0;
+      background: #252526;
+      border-right: 1px solid #1e1e1e;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .vsc-panel-title {
+      height: 35px;
+      display: flex; align-items: center;
+      padding: 0 12px;
+      font-size: 11px; font-weight: 600; letter-spacing: .8px;
+      text-transform: uppercase; color: #bbb;
+      border-bottom: 1px solid #1e1e1e;
+      flex-shrink: 0; user-select: none; gap: 7px;
+    }
+
+    .vsc-scroll {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+    }
+    .vsc-scroll::-webkit-scrollbar { width: 6px; }
+    .vsc-scroll::-webkit-scrollbar-thumb { background: #424242; border-radius: 3px; }
+
+    .vsc-editor {
+      flex: 1; background: #1e1e1e;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .vsc-tabs {
+      height: 35px; background: #2d2d2d;
+      display: flex; align-items: flex-end;
+      border-bottom: 1px solid #252526;
+      padding: 0 8px; gap: 2px; flex-shrink: 0;
+    }
+    .vsc-tab {
+      height: 29px; padding: 0 14px;
+      font-size: 11px; color: #888;
+      display: flex; align-items: center; gap: 7px;
+      background: #2d2d2d; border-right: 1px solid #1e1e1e; cursor: pointer;
+    }
+    .vsc-tab.active { background: #1e1e1e; color: #ccc; border-top: 1px solid #0078d4; }
+    .vsc-tab .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: #e0af68; display: none; }
+    .vsc-tab.dirty .tab-dot { display: block; }
+    .vsc-editor-body {
+      flex: 1; padding: 16px 20px; overflow-y: auto;
+      color: #569cd6; font-family: "SF Mono", Consolas, monospace;
+      font-size: 12px; line-height: 1.6;
+    }
+    .ln  { color: #858585; margin-right: 20px; user-select: none; font-size: 11px; }
+    .kw  { color: #c586c0; }
+    .str { color: #ce9178; }
+    .cm  { color: #6a9955; }
+    .num { color: #b5cea8; }
+    .prop{ color: #9cdcfe; }
+    .punc{ color: #d4d4d4; }
+
+    .vsc-statusbar {
+      height: 22px; background: #0078d4;
+      display: flex; align-items: center;
+      padding: 0 10px; gap: 14px; flex-shrink: 0;
+    }
+    .sb-item { font-size: 10px; color: rgba(255,255,255,.85); display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .sb-item:hover { background: rgba(255,255,255,.1); padding: 0 4px; border-radius: 2px; }
+    .sb-right { margin-left: auto; display: flex; gap: 10px; }
+
+    /* ══════════════════════════════════════
+       PLUGIN UI
+    ══════════════════════════════════════ */
+    :root {
+      --bg:   #252526;
+      --s1:   #1e1e1e;
+      --s2:   #2d2d2d;
+      --b:    #3c3c3c;
+      --acc:  #4fc1ff;
+      --acc2: #0078d4;
+      --txt:  #cccccc;
+      --dim:  #858585;
+      --ok:   #4ec9b0;
+      --warn: #ce9178;
+      --err:  #f44747;
+      --feat: #4fc1ff;
+      --fix:  #f44747;
+      --mig:  #c586c0;
+    }
+
+    .plugin { color: var(--txt); font-size: 12px; background: var(--bg); }
+
+    /* Project bar */
+    .proj-bar {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--b);
+      background: var(--s1);
+    }
+    .proj-bar label { font-size: 10px; color: var(--dim); white-space: nowrap; flex-shrink: 0; }
+    .proj-bar input {
+      flex: 1; min-width: 0;
+      background: var(--s2); border: 1px solid var(--b); border-radius: 3px;
+      color: var(--txt); font-size: 11px; padding: 3px 7px;
+      outline: none; font-family: inherit; transition: border-color .12s;
+    }
+    .proj-bar input:focus { border-color: var(--acc2); outline: 1px solid var(--acc2); }
+
+    /* Sections */
+    .p-section { padding: 8px 8px 0; }
+    .sec-label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--dim); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .sec-label::after { content: ""; flex: 1; height: 1px; background: var(--b); }
+
+    /* Fields */
+    .field { margin-bottom: 7px; }
+    .field label { display: block; font-size: 10px; color: var(--acc); margin-bottom: 2px; }
+    .field label .req  { color: var(--err); }
+    .field label .hint { font-size: 9px; opacity: .7; }
+
+    .p-input {
+      width: 100%;
+      background: var(--s2); border: 1px solid var(--b); border-radius: 3px;
+      color: var(--txt); font-size: 11px; padding: 4px 8px;
+      outline: none; font-family: inherit; transition: border-color .12s;
+    }
+    .p-input:focus { border-color: var(--acc2); outline: 1px solid var(--acc2); }
+    .p-input.err   { border-color: var(--err); }
+    textarea.p-input { resize: vertical; min-height: 52px; line-height: 1.45; }
+
+    .row-13 { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin-bottom: 7px; }
+    .row-13-full { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
+
+    .pick-row { display: flex; gap: 4px; }
+    .pick-row .p-input { flex: 1; min-width: 0; }
+    .btn-pick {
+      flex-shrink: 0; height: 26px;
+      background: var(--s2); border: 1px solid var(--b); border-radius: 3px;
+      color: var(--dim); font-size: 10px; padding: 0 8px;
+      cursor: pointer; display: flex; align-items: center; gap: 3px;
+      transition: border-color .12s, color .12s; white-space: nowrap;
+    }
+    .btn-pick:hover { border-color: var(--acc2); color: var(--txt); }
+
+    /* Type buttons */
+    .type-row { display: flex; gap: 4px; }
+    .type-btn {
+      flex: 1; border: 1px solid var(--b); border-radius: 3px;
+      background: var(--s2); color: var(--dim); font-size: 11px;
+      padding: 4px 2px; cursor: pointer; text-align: center; transition: all .12s;
+    }
+    .type-btn:hover { border-color: var(--acc2); color: var(--txt); }
+    .type-btn.on[data-type="feature"]   { background: rgba(79,193,255,.12); border-color: var(--feat); color: var(--feat); }
+    .type-btn.on[data-type="fix"]       { background: rgba(244,71,71,.12);  border-color: var(--fix);  color: var(--fix); }
+    .type-btn.on[data-type="migration"] { background: rgba(197,134,192,.12);border-color: var(--mig);  color: var(--mig); }
+
+    /* PR preview */
+    .pr-prev {
+      font-size: 10px; color: var(--dim); margin-top: 2px; min-height: 13px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .pr-prev code {
+      background: var(--s1); border: 1px solid var(--b); border-radius: 2px;
+      padding: 0 5px; color: var(--acc); font-size: 10px;
+      font-family: "SF Mono", Consolas, monospace;
+    }
+    .badge-auto {
+      background: rgba(78,201,176,.1); border: 1px solid var(--ok);
+      color: var(--ok); border-radius: 8px; font-size: 9px; padding: 0 4px;
+    }
+
+    /* Draft toggle */
+    .draft-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--s2); border: 1px solid var(--b); border-radius: 3px;
+      padding: 5px 8px; margin-bottom: 7px;
+    }
+    .draft-label { font-size: 11px; color: var(--txt); display: flex; align-items: center; gap: 5px; }
+    .toggle { position: relative; width: 28px; height: 16px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: var(--b); border-radius: 16px; cursor: pointer; transition: .15s; }
+    .slider::before {
+      content: ""; position: absolute; width: 10px; height: 10px;
+      left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .15s;
+    }
+    .toggle input:checked + .slider { background: var(--warn); }
+    .toggle input:checked + .slider::before { transform: translateX(12px); }
+
+    /* Tags */
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px; }
+    .tag {
+      display: flex; align-items: center; gap: 3px;
+      background: var(--s2); border: 1px solid var(--b); border-radius: 10px;
+      padding: 2px 8px; font-size: 10px; cursor: pointer; user-select: none;
+      transition: all .12s;
+    }
+    .tag input { display: none; }
+    .tag.on   { background: rgba(79,193,255,.1);  border-color: var(--feat); color: var(--feat); }
+    .tag.on.r { background: rgba(244,71,71,.1);   border-color: var(--err);  color: var(--err); }
+    .tag.on.g { background: rgba(78,201,176,.1);  border-color: var(--ok);   color: var(--ok); }
+    .tag.on.d { background: rgba(133,133,133,.1); border-color: var(--dim);  color: var(--dim); }
+    .tag.on.y { background: rgba(206,145,120,.1); border-color: var(--warn); color: var(--warn); }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    hr.p-div { border: none; border-top: 1px solid var(--b); margin: 4px 8px 8px; }
+
+    .ferr { font-size: 10px; color: var(--err); margin-top: 2px; display: none; }
+    .ferr.on { display: block; }
+
+    /* Actions */
+    .p-actions { display: flex; gap: 6px; padding: 8px; }
+    .p-btn {
+      flex: 1; padding: 6px 10px; border-radius: 3px; border: none;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      transition: all .12s; font-family: inherit;
+    }
+    .p-btn-primary   { background: var(--acc2); color: #fff; }
+    .p-btn-primary:hover { background: #1a8fe0; }
+    .p-btn-secondary { background: var(--s2); border: 1px solid var(--b); color: var(--txt); }
+    .p-btn-secondary:hover { border-color: var(--acc2); }
+
+    /* JSON output */
+    .json-wrap { margin: 0 8px 8px; background: var(--s1); border: 1px solid var(--b); border-radius: 3px; overflow: hidden; }
+    .json-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 8px; background: var(--s2); border-bottom: 1px solid var(--b);
+    }
+    .json-hdr span { font-size: 10px; font-weight: 600; color: var(--txt); }
+    .btn-copy {
+      background: transparent; border: 1px solid var(--b); border-radius: 2px;
+      color: var(--dim); font-size: 10px; padding: 1px 7px; cursor: pointer;
+      display: flex; align-items: center; gap: 3px; transition: all .12s;
+    }
+    .btn-copy:hover { border-color: var(--acc2); color: var(--txt); }
+    .btn-copy.ok    { border-color: var(--ok); color: var(--ok); }
+    .json-body { padding: 8px; overflow-x: auto; max-height: 180px; overflow-y: auto; }
+    pre { font-family: "SF Mono", Consolas, monospace; font-size: 10px; line-height: 1.5; color: #d4d4d4; white-space: pre-wrap; word-break: break-all; }
+    .json-ph { color: var(--dim); font-size: 10px; text-align: center; padding: 12px; font-style: italic; }
+
+    .p-bottom { height: 16px; }
+
+    /* Webview-only mode: show prompt config component only */
+    body {
+      background: #252526;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .vsc-window {
+      width: 100%;
+      height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .vsc-titlebar,
+    .vsc-activity,
+    .vsc-editor,
+    .vsc-statusbar {
+      display: none;
+    }
+    .vsc-body {
+      display: block;
+      height: 100%;
+    }
+    .vsc-sidebar {
+      width: 100%;
+      height: 100%;
+      border-right: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="vsc-window">
+
+  <!-- Title bar -->
+  <div class="vsc-titlebar">
+    <span class="vsc-dot red"></span>
+    <span class="vsc-dot yellow"></span>
+    <span class="vsc-dot green"></span>
+    <span class="vsc-title">fury_mp-seller-activation — Visual Studio Code</span>
+  </div>
+
+  <div class="vsc-body">
+
+    <!-- Activity bar -->
+    <div class="vsc-activity">
+      <div class="act-icon active" title="Explorer">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 0H8.5L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.5l1.5-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zM14.57 22.5H2.5v-15H7v9.07L8.5 18h6.07v4.5zm5.93-6H8.5v-15H16V6.5L17.5 8h3v8.5z"/></svg>
+      </div>
+      <div class="act-icon" title="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 22.88l1.12 1.12 8.06-8.06A8.25 8.25 0 1 0 15.25 0zm0 15a6.75 6.75 0 1 1 0-13.5 6.75 6.75 0 0 1 0 13.5z"/></svg>
+      </div>
+      <div class="act-icon" title="Source Control">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.007 8.222A3.738 3.738 0 0 0 15.045 5.2a3.737 3.737 0 0 0 1.156 6.583 2.988 2.988 0 0 1-2.668 1.67h-2.99a4.456 4.456 0 0 0-2.989 1.165V7.4a3.737 3.737 0 1 0-1.494 0v9.117a3.776 3.776 0 1 0 1.816.099 2.99 2.99 0 0 1 2.668-1.667h2.99a4.484 4.484 0 0 0 4.223-3.039 3.736 3.736 0 0 0 3.25-3.688zM4.565 3.738a2.242 2.242 0 1 1 4.484 0 2.242 2.242 0 0 1-4.484 0zm4.484 16.441a2.242 2.242 0 1 1-4.484 0 2.242 2.242 0 0 1 4.484 0zm8.221-9.715a2.242 2.242 0 1 1 0-4.485 2.242 2.242 0 0 1 0 4.485z"/></svg>
+      </div>
+      <div style="margin-top:auto;margin-bottom:8px">
+        <div class="act-icon" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.67-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.33-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.66c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SIDEBAR PLUGIN ══ -->
+    <div class="vsc-sidebar">
+      <div class="vsc-scroll">
+        <div class="plugin">
+
+          <!-- Project bar -->
+          <div class="proj-bar">
+            <label>Project</label>
+            <div class="pick-row" style="flex:1;min-width:0">
+              <input class="p-input" type="text" id="project" placeholder="my-project" />
+              <button class="btn-pick" id="btnBrowse" title="Browse">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5L6.33 1.585A1.75 1.75 0 0 0 5.06 1H1.75z"/></svg>
+              </button>
+              <button class="btn-pick" id="btnClear" title="Clear form">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Workspace -->
+          <div class="p-section">
+            <div class="sec-label">Workspace</div>
+            <div class="field">
+              <label>Specs folder <span class="req">*</span></label>
+              <input class="p-input" type="text" id="specsFolder" placeholder="specs" />
+              <div class="ferr" id="e-specs">Required</div>
+            </div>
+            <div class="field">
+              <label>Docs folder</label>
+              <input class="p-input" type="text" id="docsFolder" placeholder="docs" />
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- Feature -->
+          <div class="p-section">
+            <div class="sec-label">Feature</div>
+            <div class="field">
+              <label>Name <span class="req">*</span> <span class="hint">(use '-', no spaces)</span></label>
+              <input class="p-input" type="text" id="featureName" placeholder="add-payment-webhook" />
+              <div class="ferr" id="e-feat">Letters, numbers and '-' only</div>
+            </div>
+            <div class="row-13">
+              <div class="field" style="margin-bottom:0">
+                <label>Base branch <span class="req">*</span></label>
+                <input class="p-input" type="text" id="targetBranch" value="develop" />
+                <div class="ferr" id="e-branch">Required</div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label>Type <span class="req">*</span></label>
+                <div class="type-row">
+                  <button class="type-btn on" id="btnTypeFeature" data-type="feature" title="Feature">F</button>
+                  <button class="type-btn" id="btnTypeFix" data-type="fix" title="Fix">B</button>
+                  <button class="type-btn" id="btnTypeMigration" data-type="migration" title="Migration">M</button>
+                </div>
+              </div>
+              <div class="draft-row row-13-full" style="margin-top:0;margin-bottom:0;">
+                <span class="draft-label">Create as git worktree</span>
+                <label class="toggle">
+                  <input type="checkbox" id="createWorktree" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- Pull Request -->
+          <div class="p-section">
+            <div class="sec-label">Pull Request</div>
+            <div class="field">
+              <div class="field">
+              <label>Jira ticket <span class="hint">(e.g. PROJ-123)</span></label>
+              <input class="p-input" type="text" id="jiraTicket" placeholder="PROJ-123" />
+            </div>
+            <div class="field">
+              <label>PR name <span class="hint">(empty = auto)</span></label>
+              <input class="p-input" type="text" id="prName" placeholder="Leave empty for auto-generation" />
+              <div class="pr-prev" id="prPreview"></div>
+            </div>
+            <div class="draft-row">
+              <span class="draft-label">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--warn)"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086z"/></svg>
+                Open as <strong style="color:var(--warn);margin-left:3px">Draft</strong>
+              </span>
+              <label class="toggle">
+                <input type="checkbox" id="isDraft" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="field">
+              <label>Tags</label>
+              <div class="tags" id="tagsWrap"></div>
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- References -->
+          <div class="p-section">
+            <div class="sec-label">References</div>
+            <div class="field">
+              <label>Reference paths <span class="hint">(one path per line)</span></label>
+              <textarea class="p-input" id="referencePaths" placeholder="/docs/context.md
+/docs/architecture/adr-001.md
+/CONTRIBUTING.md"></textarea>
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- Description -->
+          <div class="p-section">
+            <div class="sec-label">Description</div>
+            <div class="field">
+              <label>Functional <span class="req">*</span></label>
+              <textarea class="p-input" id="functionalDesc" placeholder="What it does, for whom, why..."></textarea>
+              <div class="ferr" id="e-func">Required (min. 10 chars)</div>
+            </div>
+            <div class="field">
+              <label>Technical</label>
+              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies..."></textarea>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="p-actions">
+<button class="p-btn p-btn-primary" id="btnGenerate" onclick="generatePrompt()">
+              Generate Prompt
+            </button>
+          </div>
+
+          <!-- Prompt Output -->
+          <div class="json-wrap" id="jsonCard">
+            <div class="json-hdr">
+              <span>Output Prompt</span>
+              <button class="btn-copy" id="btnCopy" style="display:none">Copy</button>
+            </div>
+            <div class="json-body">
+              <div class="json-ph" id="jsonPh">Fill the form and click <strong>Generate Prompt</strong></div>
+              <pre id="jsonOut" style="display:none"></pre>
+            </div>
+          </div>
+
+          <div class="p-bottom"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FAKE EDITOR ══ -->
+    <div class="vsc-editor">
+      <div class="vsc-tabs">
+        <div class="vsc-tab active dirty"><span>context.md</span><span class="tab-dot"></span></div>
+        <div class="vsc-tab">plan.md</div>
+      </div>
+      <div class="vsc-editor-body">
+        <span class="ln">1</span><span class="cm"># Project Context — fury_mp-seller-activation</span><br>
+        <span class="ln">2</span><br>
+        <span class="ln">3</span><span class="cm">## Architecture</span><br>
+        <span class="ln">4</span><span class="punc">- </span><span class="prop">Language</span><span class="punc">:</span> <span class="str">Go 1.21</span><br>
+        <span class="ln">5</span><span class="punc">- </span><span class="prop">Framework</span><span class="punc">:</span> <span class="str">go-core v2.4</span><br>
+        <span class="ln">6</span><span class="punc">- </span><span class="prop">Storage</span><span class="punc">:</span> <span class="str">KVS (primary), MySQL (audit)</span><br>
+        <span class="ln">7</span><span class="punc">- </span><span class="prop">Queue</span><span class="punc">:</span> <span class="str">BigQueue (3 consumers)</span><br>
+        <span class="ln">8</span><br>
+        <span class="ln">9</span><span class="cm">## Key Patterns</span><br>
+        <span class="ln">10</span><span class="punc">- </span><span class="str">Hexagonal architecture</span><br>
+        <span class="ln">11</span><span class="punc">- </span><span class="str">UseCase&lt;T,R&gt; interface</span><br>
+        <span class="ln">12</span><span class="punc">- </span><span class="str">Vavr Either for error handling</span><br>
+        <span class="ln">13</span><span class="punc">- </span><span class="str">Distributed lock via KVS</span><br>
+        <span class="ln">14</span><br>
+        <span class="ln">15</span><span class="cm">## Current State</span><br>
+        <span class="ln">16</span><span class="punc">- </span><span class="prop">Open PRs</span><span class="punc">:</span> <span class="num">3</span><br>
+        <span class="ln">17</span><span class="punc">- </span><span class="prop">Coverage</span><span class="punc">:</span> <span class="num">78%</span><br>
+        <span class="ln">18</span><span class="punc">- </span><span class="prop">Known debt</span><span class="punc">:</span> <span class="str">ddl-auto=update in prod</span><br>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Status bar -->
+  <div class="vsc-statusbar">
+    <div class="sb-item">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0-1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5a2.25 2.25 0 0 0 2.25-2.25v-.878a2.25 2.25 0 1 0-1.5 0v.878a.75.75 0 0 1-.75.75h-4.5A.75.75 0 0 1 5 6.25v-.878zm3.75 7.378a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm3-8.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z"/></svg>
+      main
+    </div>
+    <div class="sb-item">↺ 0 ↓ 0</div>
+    <div class="sb-right">
+      <div class="sb-item">Markdown</div>
+      <div class="sb-item">UTF-8</div>
+      <div class="sb-item">Ln 18, Col 1</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Prompt Template (hidden) -->
+<script type="text/template" id="promptTemplate">
+# AI Feature Development Assistant
+
+You are an expert AI assistant specialized in feature development. Your role is to guide the implementation of features following best practices, ensuring code quality, and maintaining clear documentation throughout the process.
+
+## Context
+
+Project: {{project}}
+Feature: {{featureName}}
+Type: {{type}}
+Target Branch: {{targetBranch}}
+Branch Name: {{type}}/{{featureName}}
+
+{{#jiraTicket}}## Jira Ticket: {{jiraTicket}}
+
+Access and extract from the ticket:
+- Full description and requirements
+- Acceptance criteria
+- Attachments, mockups, or design documents
+- Linked pull requests or commits
+- Team comments with additional context
+- Related or blocking issues
+
+If the ticket is incomplete or unclear, ask the user for clarification before proceeding.{{/jiraTicket}}
+
+{{^jiraTicket}}## No Jira Ticket
+
+No Jira ticket was provided. Use the feature description and project documentation as the primary source of requirements. Ask the user if you need clarification.{{/jiraTicket}}
+
+{{#prName}}## Pull Request
+Name: {{prName}}{{/prName}}
+{{#isDraft}}Status: Draft PR (do not merge until explicitly approved){{/isDraft}}
+{{#tags}}Labels to apply: {{tags}}{{/tags}}
+
+---
+
+## Your Workflow
+
+Follow this order strictly:
+
+### Phase 1: Discovery (Read Before Acting)
+1. Read ALL markdown files in the project root (*.md)
+2. Read ALL markdown files in {{docsFolder}}/ directory
+{{#referencePaths}}3. Review additional references: {{referencePaths}}{{/referencePaths}}
+4. Analyze the existing codebase to understand:
+   - How similar features are structured
+   - Established patterns and conventions
+   - Architecture and component relationships
+   - API contracts and interfaces
+   - Dependencies and external services
+
+### Phase 2: Planning (Document Before Coding)
+5. Create folder structure:
+   ```
+   mkdir -p {{specsFolder}}/{{featureName}}
+   ```
+6. Add to .gitignore:
+   ```
+   {{specsFolder}}/
+   .env
+   ```
+   **CRITICAL**: NEVER commit environment files with secrets
+
+7. {{#createWorktree}}Create git worktree:
+   ```
+   git worktree add {{specsFolder}}/.worktrees/{{featureName}} {{targetBranch}}
+   ```
+   {{/createWorktree}}
+   {{^createWorktree}}Create feature branch:
+   ```
+   git checkout -b {{type}}/{{featureName}} {{targetBranch}}
+   ```
+   {{/createWorktree}}
+
+8. Generate `{{specsFolder}}/{{featureName}}/context.md`:
+
+   Document the current state based on your analysis:
+   - Architecture: System design, main components, data flow
+   - Tech Stack: Languages, frameworks, libraries, tools used
+   - Patterns: Coding conventions, architectural patterns
+   - Current Status: What exists that relates to this feature
+   - Technical Debt: Known issues, outdated code, areas needing attention
+   - Constraints: Limitations, requirements, non-functional considerations
+
+9. Generate `{{specsFolder}}/{{featureName}}/plan.md`:
+
+   Structure the plan in two dimensions:
+
+   **A) By Functionality (group related features together)**
+   Break down the feature into logical functional units.
+
+   **B) By Technical Complexity (within each functional unit)**
+   - Step 1: Simplest to implement
+   - Step 2: Medium complexity
+   - Step 3: Most complex
+
+   Example structure:
+   ```
+   ## Functional Unit 1: [Name]
+   - [ ] Step 1: [Simplest task]
+   - [ ] Step 2: [Medium task]
+   - [ ] Step 3: [Complex task]
+   ```
+
+   **General Technical Guidelines:**
+   - Foundation: Basic data structures, models, core interfaces
+   - Core: Main implementation, primary use cases
+   - Integration: External APIs, databases, event handlers
+   - Polish: Error handling, validation, security, performance
+
+   **Error Handling and Observability:**
+   - **Logging**: Only log on errors, never for successful operations
+   - **Log Context**: Propagate errors to the appropriate layer where full context is available
+   - **Resilience**: Implement retry with exponential backoff, fallback behavior, timeouts, circuit breaker
+
+   For each step include:
+   - [ ] not started, [x] completed
+   - Description, technical notes, dependencies, acceptance criteria
+
+### Phase 3: Implementation
+10. Implement by functional units, following complexity order (simplest first)
+11. Write tests alongside code
+12. Run linters and fix issues
+13. Commit incrementally with clear messages
+
+### Phase 4: Quality Assurance
+14. Run all code review tools (linters, static analyzers, type checkers, security scanners)
+15. Run tests (only report failures to minimize tokens, aim for 100% coverage)
+16. Code cleanup:
+    - Remove debug code (console.log, print, etc.)
+    - Remove unused imports, variables, dependencies
+    - Replace magic numbers/strings with named constants
+17. Update documentation and code comments
+
+### Phase 5: Delivery
+18. Review the plan and check all tasks completed
+{{#docsFolder}}19. Generate technical documentation in {{docsFolder}}/:
+    - `architecture.md` - System design and components
+    - `api-externals.md` - External API contracts, endpoints
+    - `data-models.md` - Data structures, schemas
+    - `dependencies.md` - External services and libraries
+{{/docsFolder}}
+20. Open PR:
+    - Title: {{#prName}}{{prName}}{{/prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}
+    - Source: {{type}}/{{featureName}} from {{targetBranch}}
+    - Labels: {{tags}}
+    - Draft: {{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}
+21. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
+
+---
+
+## Feature Description (from user)
+
+User input:
+**What it does:** {{functionalDesc}}
+
+{{#technicalDesc}}**Technical requirements:** {{technicalDesc}}{{/technicalDesc}}
+
+**IMPORTANT:** After reading documentation and analyzing the codebase, process these descriptions:
+1. Reorganize and clarify the ideas - the user may have written them poorly
+2. Break down into clear, ordered requirements from simplest to most complex
+3. Add any missing context based on your analysis
+4. Present the refined version in your response
+
+The refined descriptions will be included in the final initial-prompt.md that you save at the end.
+
+---
+
+## Technical Principles
+
+- **SOLID**: Single responsibility, Open/closed, Liskov substitution, Interface segregation, Dependency inversion
+- **YAGNI**: You Aren't Gonna Need It - don't add functionality until necessary
+- **DRY**: Don't Repeat Yourself - extract common logic
+- **KISS**: Keep It Simple - favor simple solutions
+
+**Code Quality:**
+- Descriptive names for variables, methods, components
+- Reuse methods and components; extract common logic into utils/helpers
+
+## Security Checklist
+
+**CRITICAL:**
+- NEVER hardcode API keys, tokens, passwords, or secrets
+- NEVER expose credentials in logs or error messages
+- Flag any hardcoded secrets as CRITICAL ERROR and ask user how to handle
+
+Also verify:
+- Input validation, output sanitization
+- SQL injection prevention, XSS prevention
+- Authentication/authorization enforced
+- Rate limiting, CORS configured, HTTPS enforced
+
+## Communication Protocol
+
+**ASK THE USER** if you:
+- Have doubts about requirements or implementation
+- Need clarification on any ticket or document
+- Are unsure about architectural decisions
+- Encounter blockers you cannot resolve
+- Want to deviate from the plan
+
+**NEVER** make assumptions when unclear. Ask first.
+
+---
+
+Start by reading the documentation, analyze the codebase, and ask me your doubts before proceeding.
+</script>
+
+<script nonce="{{nonce}}">
+  let currentType = 'feature';
+
+  const baseTags = [
+    { id:'bug', cls:'r' },
+    { id:'documentation', cls:'g' },
+    { id:'duplicate', cls:'d' },
+    { id:'enhancement', cls:'' },
+    { id:'feature', cls:'' },
+    { id:'fix', cls:'' },
+    { id:'good first issue', cls:'y' },
+  ];
+  const typeDefaultTag = {
+    feature: 'feature',
+    fix: 'fix',
+    migration: 'enhancement',
+  };
+  const draftTags = [
+    { id:'draft', cls:'d' },
+  ];
+
+  const vscode = acquireVsCodeApi();
+
+  function pickDir(targetId) {
+    vscode.postMessage({ type: 'pickFolder', targetId });
+  }
+
+  function setType(t) {
+    currentType = t;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('on', b.dataset.type === t));
+    renderTags(); updatePreview();
+  }
+
+  function sanitize(el) {
+    el.value = el.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+  }
+
+  function updatePreview() {
+    const manual = document.getElementById('prName').value.trim();
+    const feat   = document.getElementById('featureName').value.trim();
+    const el     = document.getElementById('prPreview');
+    if (manual)    el.innerHTML = `<span>→</span> <code>${manual}</code>`;
+    else if (feat) el.innerHTML = `<span>→</span> <code>${currentType}/${feat}</code> <span class="badge-auto">auto</span>`;
+    else           el.innerHTML = `<span style="color:var(--dim)">AI will generate the name</span>`;
+  }
+
+  function renderTags() {
+    const w = document.getElementById('tagsWrap');
+    w.innerHTML = '';
+    const isDraft = document.getElementById('isDraft')?.checked;
+    const defaultTag = typeDefaultTag[currentType];
+    baseTags.forEach(t => w.appendChild(mkTag(t, t.id === defaultTag)));
+    draftTags.forEach(t => w.appendChild(mkTag(t, t.id==='draft'&&isDraft)));
+  }
+
+  function mkTag(cfg, checked) {
+    const l = document.createElement('label');
+    l.className = `tag${checked?' on':''}${cfg.cls?' '+cfg.cls:''}`;
+    l.innerHTML = `<input type="checkbox" id="tag-${cfg.id}"${checked?' checked':''}><span class="dot"></span>${cfg.id}`;
+    l.querySelector('input').addEventListener('change', function(){ l.classList.toggle('on', this.checked); });
+    return l;
+  }
+
+  function updateDraftTags() {
+    const isDraft = document.getElementById('isDraft').checked;
+    const cb = document.getElementById('tag-draft');
+    if (!cb) return;
+    cb.checked = isDraft;
+    cb.closest('.tag').classList.toggle('on', isDraft);
+  }
+
+  function getTags() {
+    return [...document.querySelectorAll('#tagsWrap input:checked')].map(c => c.id.replace('tag-',''));
+  }
+
+  function validate() {
+    const rules = [
+      { id:'specsFolder',    err:'e-specs',  ok: v => v.trim() },
+      { id:'project',        err:null,        ok: v => v.trim() },
+      { id:'featureName',    err:'e-feat',   ok: v => /^[a-z0-9\-]+$/.test(v.trim()) },
+      { id:'targetBranch',   err:'e-branch', ok: v => v.trim() },
+      { id:'functionalDesc', err:'e-func',   ok: v => v.trim().length >= 10 },
+    ];
+    let ok = true;
+    rules.forEach(r => {
+      const el = document.getElementById(r.id); if (!el) return;
+      const valid = r.ok(el.value);
+      el.classList.toggle('err', !valid);
+      if (r.err) { const e = document.getElementById(r.err); if (e) e.classList.toggle('on', !valid); }
+      if (!valid) ok = false;
+    });
+    return ok;
+  }
+
+  function renderTemplate(template, data) {
+    return template.replace(/\{\{(#|\^)?([a-zA-Z0-9.]+)\}\}/g, (match, type, key) => {
+      const value = key.split('.').reduce((obj, k) => obj?.[k], data);
+      if (type === '#') {
+        return value ? data.__block : '';
+      }
+      if (type === '^') {
+        return value ? '' : (data.__blocks?.[key] || '');
+      }
+      return value !== undefined && value !== null ? value : '';
+    });
+  }
+
+  function generatePrompt() {
+    if (!validate()) return;
+    
+    const sf   = document.getElementById('specsFolder').value.trim();
+    const proj = document.getElementById('project').value.trim();
+    const feat = document.getElementById('featureName').value.trim();
+    const br   = document.getElementById('targetBranch').value.trim();
+    const jira = document.getElementById('jiraTicket').value.trim();
+    const prM  = document.getElementById('prName').value.trim();
+    const fD   = document.getElementById('functionalDesc').value.trim();
+    const tD   = document.getElementById('technicalDesc').value.trim();
+    const docs = document.getElementById('docsFolder').value.trim() || 'docs';
+    const refs = [...new Set(document.getElementById('referencePaths').value
+      .split('\n')
+      .map(v => v.trim())
+      .filter(Boolean))];
+    const dr   = document.getElementById('isDraft').checked;
+    const cw   = document.getElementById('createWorktree').checked;
+    const tags = getTags();
+
+    const data = {
+      project: proj,
+      featureName: feat,
+      type: currentType,
+      targetBranch: br,
+      jiraTicket: jira || null,
+      prName: prM || null,
+      functionalDesc: fD,
+      technicalDesc: tD || null,
+      docsFolder: docs,
+      specsFolder: sf,
+      referencePaths: refs,
+      isDraft: dr,
+      createWorktree: cw,
+      tags: tags.join(', '),
+      __blocks: {}
+    };
+
+    let template = document.getElementById('promptTemplate').textContent;
+    let result = template;
+    
+    result = result.replace(/\{\{#([a-zA-Z0-9]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, key, block) => {
+      return data[key] ? block : '';
+    });
+    
+    result = result.replace(/\{\{\^([a-zA-Z0-9]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, key, block) => {
+      return !data[key] ? block : '';
+    });
+    
+    result = result.replace(/\{\{([a-zA-Z0-9.]+)\}\}/g, (match, key) => {
+      const value = key.split('.').reduce((obj, k) => obj?.[k], data);
+      return value !== undefined && value !== null ? value : '';
+    });
+
+    const pre = document.getElementById('jsonOut');
+    pre.textContent = result;
+    pre.style.display = 'block';
+    document.getElementById('jsonPh').style.display = 'none';
+    document.getElementById('btnCopy').style.display = 'flex';
+    saveState();
+  }
+
+  function copyJSON() {
+    const text = document.getElementById('jsonOut').textContent || '';
+    vscode.postMessage({ type: 'copyToClipboard', text });
+  }
+
+  function setCopyState(isCopied) {
+    const b = document.getElementById('btnCopy');
+    if (!b) return;
+    if (isCopied) {
+      b.classList.add('ok');
+      b.textContent = '✓ Copied!';
+      setTimeout(() => {
+        b.classList.remove('ok');
+        b.textContent = 'Copy';
+      }, 2000);
+    } else {
+      b.classList.remove('ok');
+      b.textContent = 'Copy';
+    }
+  }
+
+  function resetForm() {
+    ['project','specsFolder','docsFolder','featureName','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('targetBranch').value = 'develop';
+    document.getElementById('isDraft').checked = true;
+    document.getElementById('createWorktree').checked = false;
+    document.querySelectorAll('.err').forEach(e => e.classList.remove('err'));
+    document.querySelectorAll('.ferr').forEach(e => e.classList.remove('on'));
+    setType('feature');
+    document.getElementById('jsonOut').style.display = 'none';
+    document.getElementById('jsonPh').style.display = 'block';
+    document.getElementById('btnCopy').style.display = 'none';
+    saveState();
+  }
+
+  function getFormState() {
+    return {
+      project: document.getElementById('project')?.value ?? '',
+      specsFolder: document.getElementById('specsFolder')?.value ?? '',
+      docsFolder: document.getElementById('docsFolder')?.value ?? '',
+      featureName: document.getElementById('featureName')?.value ?? '',
+      targetBranch: document.getElementById('targetBranch')?.value ?? 'develop',
+      jiraTicket: document.getElementById('jiraTicket')?.value ?? '',
+      prName: document.getElementById('prName')?.value ?? '',
+      isDraft: !!document.getElementById('isDraft')?.checked,
+      createWorktree: !!document.getElementById('createWorktree')?.checked,
+      referencePaths: document.getElementById('referencePaths')?.value ?? '',
+      functionalDesc: document.getElementById('functionalDesc')?.value ?? '',
+      technicalDesc: document.getElementById('technicalDesc')?.value ?? '',
+      currentType,
+      tags: getTags(),
+      output: document.getElementById('jsonOut')?.textContent ?? '',
+      outputVisible: document.getElementById('jsonOut')?.style.display !== 'none',
+    };
+  }
+
+  function restoreFormState(state) {
+    if (!state) return;
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+    setVal('project', state.project);
+    setVal('specsFolder', state.specsFolder);
+    setVal('docsFolder', state.docsFolder);
+    setVal('featureName', state.featureName);
+    setVal('targetBranch', state.targetBranch || 'develop');
+    setVal('jiraTicket', state.jiraTicket);
+    setVal('prName', state.prName);
+    setVal('referencePaths', state.referencePaths);
+    setVal('functionalDesc', state.functionalDesc);
+    setVal('technicalDesc', state.technicalDesc);
+
+    document.getElementById('isDraft').checked = !!state.isDraft;
+    document.getElementById('createWorktree').checked = !!state.createWorktree;
+
+    setType(state.currentType || 'feature');
+
+    // Restore tag checks (after renderTags)
+    if (Array.isArray(state.tags)) {
+      state.tags.forEach((t) => {
+        const cb = document.getElementById(`tag-${t}`);
+        if (cb) {
+          cb.checked = true;
+          cb.closest('.tag')?.classList.add('on');
+        }
+      });
+    }
+
+    updateDraftTags();
+    updatePreview();
+
+    if (state.output) {
+      const pre = document.getElementById('jsonOut');
+      pre.textContent = state.output;
+      pre.style.display = state.outputVisible ? 'block' : 'none';
+      document.getElementById('jsonPh').style.display = state.outputVisible ? 'none' : 'block';
+      document.getElementById('btnCopy').style.display = state.outputVisible ? 'flex' : 'none';
+    }
+  }
+
+  function saveState() {
+    vscode.setState(getFormState());
+  }
+
+  function bindStatePersistence() {
+    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc'];
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', saveState);
+      el.addEventListener('change', saveState);
+    });
+    document.getElementById('isDraft')?.addEventListener('change', saveState);
+    document.getElementById('createWorktree')?.addEventListener('change', saveState);
+
+    document.getElementById('tagsWrap')?.addEventListener('change', saveState);
+  }
+
+  function bindButtons() {
+    document.getElementById('btnCopy')?.addEventListener('click', copyJSON);
+    document.getElementById('btnClear')?.addEventListener('click', resetForm);
+    document.getElementById('btnBrowse')?.addEventListener('click', () => pickDir('project'));
+    document.getElementById('btnTypeFeature')?.addEventListener('click', () => setType('feature'));
+    document.getElementById('btnTypeFix')?.addEventListener('click', () => setType('fix'));
+    document.getElementById('btnTypeMigration')?.addEventListener('click', () => setType('migration'));
+    document.getElementById('btnGenerate')?.addEventListener('click', generatePrompt);
+  }
+
+  function bindFormInputs() {
+    document.getElementById('featureName')?.addEventListener('input', (e) => {
+      sanitize(e.target); updatePreview();
+    });
+    document.getElementById('prName')?.addEventListener('input', updatePreview);
+    document.getElementById('isDraft')?.addEventListener('change', updateDraftTags);
+  }
+
+  function bindWebviewMessages() {
+    window.addEventListener('message', (event) => {
+      const msg = event.data;
+      if (!msg || typeof msg !== 'object') return;
+
+      if (msg.type === 'folderPicked') {
+        const el = document.getElementById(msg.targetId);
+        if (el) {
+          el.value = msg.path;
+          saveState();
+        }
+      }
+
+      if (msg.type === 'clipboardCopied') {
+        setCopyState(!!msg.ok);
+      }
+
+      if (msg.type === 'initContext') {
+        // Only set defaults when empty
+        const proj = document.getElementById('project');
+        if (proj && !proj.value && msg.workspaceFolder) {
+          proj.value = msg.workspaceFolder;
+        }
+        saveState();
+      }
+    });
+  }
+
+  renderTags();
+  updatePreview();
+
+  bindButtons();
+  bindFormInputs();
+  bindStatePersistence();
+  bindWebviewMessages();
+
+  restoreFormState(vscode.getState());
+  vscode.postMessage({ type: 'requestInitialContext' });
+</script>
+</body>
+</html>

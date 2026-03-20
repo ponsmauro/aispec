@@ -1,0 +1,47 @@
+{
+  "name": "aiscpec",
+  "displayName": "AIScpec",
+  "description": "Feature planning and prompt generation panel for VS Code",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:aiscpec.sidebarView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiscpec",
+          "title": "AIScpec",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "aiscpec": [
+        {
+          "type": "webview",
+          "id": "aiscpec.sidebarView",
+          "name": "Feature Planner"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.2"
+  }
+}
