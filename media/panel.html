@@ -436,8 +436,8 @@
             <div class="sec-label">Pull Request</div>
             <div class="field">
               <div class="field">
-              <label>Jira ticket <span class="hint">(e.g. PROJ-123)</span></label>
-              <input class="p-input" type="text" id="jiraTicket" placeholder="PROJ-123" />
+              <label>Issue tracker ID <span class="hint">(e.g. PROJ-123)</span></label>
+              <input class="p-input" type="text" id="jiraTicket" placeholder="https://jira.company.com/browse/PROJ-123" />
             </div>
             <div class="field">
               <label>PR name <span class="hint">(empty = auto)</span></label>
@@ -480,12 +480,12 @@
             <div class="sec-label">Description</div>
             <div class="field">
               <label>Functional <span class="req">*</span></label>
-              <textarea class="p-input" id="functionalDesc" placeholder="What it does, for whom, why..."></textarea>
+              <textarea class="p-input" id="functionalDesc" placeholder="What it does, for whom, why... (or path to reference doc)"></textarea>
               <div class="ferr" id="e-func">Required (min. 10 chars)</div>
             </div>
             <div class="field">
               <label>Technical</label>
-              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies..."></textarea>
+              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies... (or path to reference doc)"></textarea>
             </div>
           </div>
 
@@ -573,7 +573,7 @@ Type: {{type}}
 Target Branch: {{targetBranch}}
 Branch Name: {{type}}/{{featureName}}
 
-{{#jiraTicket}}## Jira Ticket: {{jiraTicket}}
+{{#jiraTicket}}## Issue Tracker Ticket: {{jiraTicket}}
 
 Access and extract from the ticket:
 - Full description and requirements
@@ -587,7 +587,7 @@ If the ticket is incomplete or unclear, ask the user for clarification before pr
 
 {{^jiraTicket}}## No Jira Ticket
 
-No Jira ticket was provided. Use the feature description and project documentation as the primary source of requirements. Ask the user if you need clarification.{{/jiraTicket}}
+No issue tracker ticket provided. Use the feature description and project documentation as the primary source of requirements. Ask the user if you need clarification.{{/jiraTicket}}
 
 {{#prName}}## Pull Request
 Name: {{prName}}{{/prName}}
@@ -615,6 +615,7 @@ Follow this order strictly:
 5. Create folder structure:
    ```
    mkdir -p {{specsFolder}}/{{featureName}}
+   mkdir -p {{docsFolder}}
    ```
 6. Add to .gitignore:
    ```
@@ -696,30 +697,43 @@ Follow this order strictly:
 
 ### Phase 5: Delivery
 18. Review the plan and check all tasks completed
-{{#docsFolder}}19. Generate technical documentation in {{docsFolder}}/:
+{{#docsFolder}}19. Before creating technical docs, check if {{docsFolder}}/ is empty. If empty, create a general feature documentation file:
+   - `{{docsFolder}}/{{featureName}}.md` - General overview of this feature including:
+     - Feature purpose and goals
+     - Main components and their responsibilities
+     - User interactions and flows
+     - Key decisions made during implementation
+     - Current status and next steps
+
+20. Generate technical documentation in {{docsFolder}}/:
     - `architecture.md` - System design and components
     - `api-externals.md` - External API contracts, endpoints
     - `data-models.md` - Data structures, schemas
     - `dependencies.md` - External services and libraries
 {{/docsFolder}}
-20. Open PR:
+21. Open PR:
     - Title: {{#prName}}{{prName}}{{/prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}
     - Source: {{type}}/{{featureName}} from {{targetBranch}}
+    {{#jiraTicket}}
+    - Issue Tracker: {{jiraTicket}}
+    - After creating the PR, add the PR link to the issue tracker ticket ({{jiraTicket}}) for bidirectional reference
+    {{/jiraTicket}}
     - Labels: {{tags}}
     - Draft: {{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}
-21. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
+22. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
 
 ---
 
 ## Feature Description (from user)
 
-User input:
+User input (can be text or path to reference document):
 **What it does:** {{functionalDesc}}
 
 {{#technicalDesc}}**Technical requirements:** {{technicalDesc}}{{/technicalDesc}}
 
 **IMPORTANT:** After reading documentation and analyzing the codebase, process these descriptions:
-1. Reorganize and clarify the ideas - the user may have written them poorly
+1. If the input is a file path, read that document first
+2. Reorganize and clarify the ideas - the user may have written them poorly
 2. Break down into clear, ordered requirements from simplest to most complex
 3. Add any missing context based on your analysis
 4. Present the refined version in your response
