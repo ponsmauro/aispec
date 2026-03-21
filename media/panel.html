@@ -598,6 +598,10 @@ Name: {{prName}}{{/prName}}
 
 ## Your Workflow
 
+**IMPORTANT**: 
+- When presenting options or lists, always use numbered format with each item on a separate line for better visibility
+- Only implement what is requested - do not add extra features or improvements unless explicitly asked
+
 Follow this order strictly:
 
 ### Phase 1: Discovery (Read Before Acting)
@@ -680,6 +684,8 @@ Follow this order strictly:
    - [ ] not started, [x] completed
    - Description, technical notes, dependencies, acceptance criteria
 
+10. **MANDATORY**: Show the plan to the user for review and approval. Do NOT proceed with implementation until the user approves the plan.
+
 ### Phase 3: Implementation
 10. Implement by functional units, following complexity order (simplest first)
 11. Write tests alongside code
@@ -711,7 +717,13 @@ Follow this order strictly:
     - `data-models.md` - Data structures, schemas
     - `dependencies.md` - External services and libraries
 {{/docsFolder}}
-21. Open PR:
+21. Before creating the PR, validate and list any missing items:
+    - Pending tasks from the plan
+    - Missing tests or documentation
+    - Any security or quality issues
+    - Suggest how to address these items
+    - **WAIT for user approval before creating the PR**
+22. After user approval, create the PR:
     - Title: {{#prName}}{{prName}}{{/prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}
     - Source: {{type}}/{{featureName}} from {{targetBranch}}
     {{#jiraTicket}}
@@ -720,7 +732,7 @@ Follow this order strictly:
     {{/jiraTicket}}
     - Labels: {{tags}}
     - Draft: {{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}
-22. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
+23. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
 
 ---
 
@@ -732,11 +744,11 @@ User input (can be text or path to reference document):
 {{#technicalDesc}}**Technical requirements:** {{technicalDesc}}{{/technicalDesc}}
 
 **IMPORTANT:** After reading documentation and analyzing the codebase, process these descriptions:
-1. If the input is a file path, read that document first
+1. If the input contains file paths or URLs, read those documents and extract relevant information
 2. Reorganize and clarify the ideas - the user may have written them poorly
-2. Break down into clear, ordered requirements from simplest to most complex
-3. Add any missing context based on your analysis
-4. Present the refined version in your response
+3. Break down into clear, ordered requirements from simplest to most complex
+4. Add any missing context based on your analysis
+5. Present the refined version in your response
 
 The refined descriptions will be included in the final initial-prompt.md that you save at the end.
 
