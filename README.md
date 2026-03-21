@@ -47,8 +47,23 @@ The generated prompt includes:
 
 ## Requirements
 
+### Required
 - VS Code 1.85.0 or higher
-- Git (optional, for worktree feature)
+- A project open in VS Code
+- Git installed (for worktree and branch features)
+
+### Recommended MCPs/Skills
+For the best experience, configure these MCPs (Model Context Protocol):
+
+- **Issue Tracker MCP** - Connect to Jira, GitHub Issues, Linear, etc.
+- **Git/GitHub MCP** - Create branches, PRs, check repository status
+- **AI Assistant** - Your preferred AI model (Claude, GPT, etc.)
+- **File System MCP** - Read/write documentation files
+
+### Optional
+- Configured linters and formatters
+- Test suite set up
+- CI/CD pipeline configured
 
 ## Installation
 

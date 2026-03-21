@@ -2,7 +2,7 @@
   "name": "aispec",
   "displayName": "AISpec",
   "description": "AI Feature Development Assistant - Generate comprehensive prompts for feature development",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "PonsMauro",
   "repository": "https://github.com/ponsmauro/aispec",
   "engines": {
