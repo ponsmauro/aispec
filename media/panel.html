@@ -569,6 +569,7 @@ You are an expert AI assistant specialized in feature development. Your role is 
 
 Project: {{project}}
 Feature: {{featureName}}
+Feature Number: (will be assigned: N-{user-feature-name})
 Type: {{type}}
 Target Branch: {{targetBranch}}
 Branch Name: {{type}}/{{featureName}}
@@ -585,7 +586,7 @@ Access and extract from the ticket:
 
 If the ticket is incomplete or unclear, ask the user for clarification before proceeding.{{/jiraTicket}}
 
-{{^jiraTicket}}## No Jira Ticket
+{{^jiraTicket}}## No Issue Tracker
 
 No issue tracker ticket provided. Use the feature description and project documentation as the primary source of requirements. Ask the user if you need clarification.{{/jiraTicket}}
 
@@ -616,114 +617,129 @@ Follow this order strictly:
    - Dependencies and external services
 
 ### Phase 2: Planning (Document Before Coding)
-5. Create folder structure:
+
+5. **IMPORTANT - Feature Numbering**: Each feature gets an incremental number:
+   - Check if `{{specsFolder}}/` folder exists
+   - If yes, look for existing folders matching pattern `N-name` (e.g., `1-add-feature`, `2-fix-bug`)
+   - IMPORTANT: If a folder with `{number}-{user-feature-name}` already exists, DO NOT overwrite it - create a new one with the next available number for that feature name
+   - Find the highest number used for this specific feature name and add 1 (e.g., if `add-payment` exists with numbers 1, 2, and 3, new number is 4)
+   - If no existing specs for this feature name, start with 1
+   - The generated spec name format: `{number}-{user-feature-name}`
+      - User wrote: `add-payment`
+      - If `1-add-payment` and `2-add-payment` exist: spec name becomes `3-add-payment`
+   - Replace `{SPEC-NAME}` with this generated name in all paths below
+
+6. Create folder structure:
    ```
-   mkdir -p {{specsFolder}}/{{featureName}}
+   mkdir -p {{specsFolder}}/{SPEC-NAME}
    mkdir -p {{docsFolder}}
    ```
-6. Add to .gitignore:
+7. Add to .gitignore:
    ```
    {{specsFolder}}/
    .env
    ```
    **CRITICAL**: NEVER commit environment files with secrets
 
-7. {{#createWorktree}}Create git worktree:
+8. {{#createWorktree}}Create git worktree:
    ```
-   git worktree add {{specsFolder}}/.worktrees/{{featureName}} {{targetBranch}}
+   git worktree add {{specsFolder}}/.worktrees/{SPEC-NAME} {{targetBranch}}
+    git checkout -b {{type}}/{{featureName}} {{targetBranch}}
    ```
    {{/createWorktree}}
    {{^createWorktree}}Create feature branch:
    ```
+   git fetch --all
+   git pull origin {{targetBranch}}
    git checkout -b {{type}}/{{featureName}} {{targetBranch}}
    ```
    {{/createWorktree}}
 
-8. Generate `{{specsFolder}}/{{featureName}}/context.md`:
+9. Generate context and plan files in `{{specsFolder}}/{SPEC-NAME}/`:
 
-   Document the current state based on your analysis:
-   - Architecture: System design, main components, data flow
-   - Tech Stack: Languages, frameworks, libraries, tools used
-   - Patterns: Coding conventions, architectural patterns
-   - Current Status: What exists that relates to this feature
-   - Technical Debt: Known issues, outdated code, areas needing attention
-   - Constraints: Limitations, requirements, non-functional considerations
+    Document the current state based on your analysis (save to `{{specsFolder}}/{SPEC-NAME}/context.md`):
+    - Architecture: System design, main components, data flow
+    - Tech Stack: Languages, frameworks, libraries, tools used
+    - Patterns: Coding conventions, architectural patterns
+    - Current Status: What exists that relates to this feature
+    - Technical Debt: Known issues, outdated code, areas needing attention
+    - Constraints: Limitations, requirements, non-functional considerations
 
-9. Generate `{{specsFolder}}/{{featureName}}/plan.md`:
+10. Generate `{{specsFolder}}/{SPEC-NAME}/plan.md`:
 
-   Structure the plan in two dimensions:
+    Structure the plan in two dimensions:
 
-   **A) By Functionality (group related features together)**
-   Break down the feature into logical functional units.
+    **A) By Functionality (group related features together)**
+    Break down the feature into logical functional units.
 
-   **B) By Technical Complexity (within each functional unit)**
-   - Step 1: Simplest to implement
-   - Step 2: Medium complexity
-   - Step 3: Most complex
+    **B) By Technical Complexity (within each functional unit)**
+    - Step 1: Simplest to implement
+    - Step 2: Medium complexity
+    - Step 3: Most complex
 
-   Example structure:
-   ```
-   ## Functional Unit 1: [Name]
-   - [ ] Step 1: [Simplest task]
-   - [ ] Step 2: [Medium task]
-   - [ ] Step 3: [Complex task]
-   ```
+    Example structure:
+    ```
+    ## Functional Unit 1: [Name]
+    - [ ] Step 1: [Simplest task]
+    - [ ] Step 2: [Medium task]
+    - [ ] Step 3: [Complex task]
+    ```
 
-   **General Technical Guidelines:**
-   - Foundation: Basic data structures, models, core interfaces
-   - Core: Main implementation, primary use cases
-   - Integration: External APIs, databases, event handlers
-   - Polish: Error handling, validation, security, performance
+    **General Technical Guidelines:**
+    - Foundation: Basic data structures, models, core interfaces
+    - Core: Main implementation, primary use cases
+    - Integration: External APIs, databases, event handlers
+    - Polish: Error handling, validation, security, performance
 
-   **Error Handling and Observability:**
-   - **Logging**: Only log on errors, never for successful operations
-   - **Log Context**: Propagate errors to the appropriate layer where full context is available
-   - **Resilience**: Implement retry with exponential backoff, fallback behavior, timeouts, circuit breaker
+    **Error Handling and Observability:**
+    - **Logging**: Only log on errors, never for successful operations
+    - **Log Context**: Propagate errors to the appropriate layer where full context is available
+    - **Resilience**: Implement retry with exponential backoff, fallback behavior, timeouts, circuit breaker
 
-   For each step include:
-   - [ ] not started, [x] completed
-   - Description, technical notes, dependencies, acceptance criteria
+    For each step include:
+    - [ ] not started, [x] completed
+    - Description, technical notes, dependencies, acceptance criteria
 
-10. **MANDATORY**: Show the plan to the user for review and approval. Do NOT proceed with implementation until the user approves the plan.
+11. **MANDATORY**: Show the plan to the user for review and approval. Do NOT proceed with implementation until the user approves the plan.
 
-### Phase 3: Implementation
-10. Implement by functional units, following complexity order (simplest first)
-11. Write tests alongside code
-12. Run linters and fix issues
-13. Commit incrementally with clear messages
+### Phase 3: Implementation (after user approves the plan)
+12. Implement by functional units, following complexity order (simplest first)
+13. Write tests alongside code
+14. Run linters and fix issues
+15. Commit incrementally with clear messages
 
 ### Phase 4: Quality Assurance
-14. Run all code review tools (linters, static analyzers, type checkers, security scanners)
-15. Run tests (only report failures to minimize tokens, aim for 100% coverage)
-16. Code cleanup:
+16. Run all code review tools (linters, static analyzers, type checkers, security scanners)
+17. Run tests (only report failures to minimize tokens, aim for 100% coverage)
+18. Code cleanup:
     - Remove debug code (console.log, print, etc.)
     - Remove unused imports, variables, dependencies
     - Replace magic numbers/strings with named constants
-17. Update documentation and code comments
+19. Update documentation and code comments
 
 ### Phase 5: Delivery
-18. Review the plan and check all tasks completed
-{{#docsFolder}}19. Before creating technical docs, check if {{docsFolder}}/ is empty. If empty, create a general feature documentation file:
-   - `{{docsFolder}}/{{featureName}}.md` - General overview of this feature including:
+20. Review the plan and check all tasks completed
+{{#docsFolder}}21. Before creating technical docs, check if {{docsFolder}}/ is empty. If empty, create a general feature documentation file:
+   - `{{docsFolder}}/{SPEC-NAME}.md` - General overview of this feature including:
      - Feature purpose and goals
      - Main components and their responsibilities
      - User interactions and flows
      - Key decisions made during implementation
      - Current status and next steps
 
-20. Generate technical documentation in {{docsFolder}}/:
+22. Generate technical documentation in {{docsFolder}}/:
     - `architecture.md` - System design and components
     - `api-externals.md` - External API contracts, endpoints
     - `data-models.md` - Data structures, schemas
     - `dependencies.md` - External services and libraries
 {{/docsFolder}}
-21. Before creating the PR, validate and list any missing items:
+23. Before creating the PR, validate and list any missing items:
     - Pending tasks from the plan
     - Missing tests or documentation
     - Any security or quality issues
     - Suggest how to address these items
     - **WAIT for user approval before creating the PR**
-22. After user approval, create the PR:
+24. After user approval, create the PR:
     - Title: {{#prName}}{{prName}}{{/prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}
     - Source: {{type}}/{{featureName}} from {{targetBranch}}
     {{#jiraTicket}}
@@ -732,7 +748,7 @@ Follow this order strictly:
     {{/jiraTicket}}
     - Labels: {{tags}}
     - Draft: {{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}
-23. Save this prompt to `{{specsFolder}}/{{featureName}}/initial-prompt.md`
+25. Save this prompt to `{{specsFolder}}/{SPEC-NAME}/initial-prompt.md`
 
 ---
 

@@ -2,7 +2,7 @@
   "name": "aispec",
   "displayName": "AISpec",
   "description": "AI Feature Development Assistant - Generate comprehensive prompts for feature development",
-  "version": "0.0.9",
+  "version": "0.0.13",
   "publisher": "PonsMauro",
   "repository": "https://github.com/ponsmauro/aispec",
   "engines": {
@@ -39,7 +39,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "vscode:prepublish": "npm run compile"
+    "vscode:prepublish": "npm run compile",
+    "package": "npm run compile && npm version patch && vsce package"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

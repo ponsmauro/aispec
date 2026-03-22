@@ -1,0 +1,2 @@
+// Compile the extension and package it for distribution
+npm run compile && vsce package
