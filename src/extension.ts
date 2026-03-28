@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 
-class AIScpecSidebarProvider implements vscode.WebviewViewProvider {
+class AISpecSidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'aiscpec.sidebarView';
 
   constructor(private readonly extensionUri: vscode.Uri) {}
@@ -70,10 +70,10 @@ class AIScpecSidebarProvider implements vscode.WebviewViewProvider {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const provider = new AIScpecSidebarProvider(context.extensionUri);
+  const provider = new AISpecSidebarProvider(context.extensionUri);
 
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(AIScpecSidebarProvider.viewType, provider)
+    vscode.window.registerWebviewViewProvider(AISpecSidebarProvider.viewType, provider)
   );
 }
 
