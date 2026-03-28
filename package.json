@@ -10,7 +10,19 @@
   },
   "icon": "media/icon.png",
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Machine Learning"
+  ],
+  "tags": [
+    "ai",
+    "prompt",
+    "planning",
+    "feature-development",
+    "claude",
+    "gpt",
+    "gemini",
+    "copilot",
+    "cursor"
   ],
   "activationEvents": [
     "onView:aiscpec.sidebarView"
