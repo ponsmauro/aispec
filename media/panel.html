@@ -215,6 +215,16 @@
     .type-btn.on[data-type="fix"]       { background: rgba(244,71,71,.12);  border-color: var(--fix);  color: var(--fix); }
     .type-btn.on[data-type="migration"] { background: rgba(197,134,192,.12);border-color: var(--mig);  color: var(--mig); }
 
+    /* Architecture buttons */
+    .arch-row { display: flex; gap: 4px; }
+    .arch-btn {
+      flex: 1; border: 1px solid var(--b); border-radius: 3px;
+      background: var(--s2); color: var(--dim); font-size: 10px;
+      padding: 4px 2px; cursor: pointer; text-align: center; transition: all .12s;
+    }
+    .arch-btn:hover { border-color: var(--acc2); color: var(--txt); }
+    .arch-btn.on    { background: rgba(79,193,255,.12); border-color: var(--acc); color: var(--acc); }
+
     /* PR preview */
     .pr-prev {
       font-size: 10px; color: var(--dim); margin-top: 2px; min-height: 13px;
@@ -328,6 +338,14 @@
       height: 100%;
       border-right: none;
     }
+
+    /* AI Config Info */
+    .ai-config-info {
+      background: var(--s2); border: 1px solid var(--b); border-radius: 3px;
+      padding: 6px 8px; margin-bottom: 7px; font-size: 10px; color: var(--dim);
+    }
+    .ai-config-info .detected { color: var(--ok); }
+    .ai-config-info .detected-none { color: var(--warn); }
   </style>
 </head>
 <body>
@@ -392,6 +410,27 @@
             <div class="field">
               <label>Docs folder</label>
               <input class="p-input" type="text" id="docsFolder" placeholder="docs" />
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- Architecture -->
+          <div class="p-section">
+            <div class="sec-label">Architecture</div>
+            <div class="ai-config-info">
+              <div id="aiConfigStatus">Scanning for AI config files...</div>
+            </div>
+            <div class="field">
+              <label>Architecture <span class="hint">(if not detected)</span></label>
+              <div class="arch-row">
+                <button class="arch-btn" id="btnArchHex" data-arch="Hexagonal" title="Hexagonal">Hex</button>
+                <button class="arch-btn" id="btnArchLayered" data-arch="Layered" title="Layered">Lay</button>
+                <button class="arch-btn" id="btnArchClean" data-arch="Clean" title="Clean">Cln</button>
+                <button class="arch-btn" id="btnArchMvc" data-arch="MVC" title="MVC">MVC</button>
+                <button class="arch-btn" id="btnArchMono" data-arch="Modular Monolith" title="Modular Monolith">MM</button>
+              </div>
+              <input class="p-input" type="text" id="customArchitecture" placeholder="Or specify other" style="margin-top:4px" />
             </div>
           </div>
 
@@ -563,255 +602,296 @@
 <script type="text/template" id="promptTemplate">
 # AI Feature Development Assistant
 
-You are an expert AI assistant specialized in feature development. Your role is to guide the implementation of features following best practices, ensuring code quality, and maintaining clear documentation throughout the process.
+## CONSTRAINTS (NON-NEGOTIABLE)
 
-## Context
+DO:
+- Follow the plan step by step in order
+- Copy ALL rules directly into each plan step
+- Verify mandatory checks before each step
+- Ask user for validation before each step (if requested)
+- Implement tests alongside code
+- Use numbered format for all options
+
+NEVER:
+- Skip steps or change order
+- Add features not in the plan
+- Reference files for rules (COPY THEM)
+- Implement without user approval
+- Make assumptions (ASK)
+- Ignore mandatory checks
+- Hardcode secrets
+
+CRITICAL:
+- MUST copy ALL rules from config files into each step
+- MUST verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY before coding
+- MUST respect {{architecture}} architecture
+- MUST NOT commit credentials
+
+IF UNSURE: Ask the user
+IF BLOCKED: Ask the user
+IF CONFLICT: Ask the user
+IF NOT IN PLAN: Ask the user
+NEVER guess or assume
+
+## OUTPUT FORMAT (ALWAYS USE)
+
+When presenting plans, ALWAYS use:
+- Numbered lists (1., 2., 3.)
+- Checkboxes for completion ([ ] not started, [x] completed)
+- Headers for each section (### Step N, ## Phase X)
+- Blank lines between sections
+
+## FEEDBACK LOOP (CRITICAL)
+
+IF USER SAYS:
+- "no", "wrong", "not what I want", "not correct", "change"
+→ STOP immediately
+→ Ask: "What specifically is wrong? What should be different?"
+→ Refine, do NOT continue
+→ Show updated version before proceeding
+
+IF USER APPROVES:
+→ Continue to next step
+
+IF USER ASKS TO GO BACK:
+→ Go back, make changes, re-present for approval
+
+## TOKEN SAVING (OPTIMIZE)
+
+Only report:
+- Failures and errors
+- Summary of completed steps
+- Blockers and issues
+- Questions requiring user input
+
+DO NOT report:
+- Successful completions in detail
+- Successful linter/test runs (unless failed)
+- Already known information
+
+## IMPLEMENTATION LOG
+
+After each step, briefly document:
+- What was implemented
+- Decisions made
+- Issues found
+- Files created/modified
+
+This creates a log for future reference and helps track progress.
+
+## CONTEXT
 
 Project: {{project}}
-Feature: {{featureName}}
-Feature Number: (will be assigned: N-{user-feature-name})
+Feature: {{featureName}} (Feature #{N})
 Type: {{type}}
-Target Branch: {{targetBranch}}
-Branch Name: {{type}}/{{featureName}}
+Branch: {{type}}/{{featureName}}
+Target: {{targetBranch}}
 
-{{#jiraTicket}}## Issue Tracker Ticket: {{jiraTicket}}
+{{#architecture}}Architecture: {{architecture}}
+{{#architectureDetails}}{{architectureDetails}}{{/architectureDetails}}
+{{/architecture}}
 
-Access and extract from the ticket:
-- Full description and requirements
-- Acceptance criteria
-- Attachments, mockups, or design documents
-- Linked pull requests or commits
-- Team comments with additional context
-- Related or blocking issues
+{{#jiraTicket}}Ticket: {{jiraTicket}}{{/jiraTicket}}
+{{#prName}}PR: {{prName}}{{/prName}}
+{{#isDraft}}Status: Draft (requires explicit approval){{/isDraft}}
+{{#tags}}Labels: {{tags}}{{/tags}}
 
-If the ticket is incomplete or unclear, ask the user for clarification before proceeding.{{/jiraTicket}}
+## USER'S VISION
 
-{{^jiraTicket}}## No Issue Tracker
+What: {{functionalDesc}}
+{{#technicalDesc}}Technical: {{technicalDesc}}{{/technicalDesc}}
 
-No issue tracker ticket provided. Use the feature description and project documentation as the primary source of requirements. Ask the user if you need clarification.{{/jiraTicket}}
+Read and understand this vision before planning.
 
-{{#prName}}## Pull Request
-Name: {{prName}}{{/prName}}
-{{#isDraft}}Status: Draft PR (do not merge until explicitly approved){{/isDraft}}
-{{#tags}}Labels to apply: {{tags}}{{/tags}}
+## PHASE 1: DISCOVERY
 
----
+**Step 1: Scan AI Config Files**
+Read ALL AI agent config files. ANY file with rules/conventions/guidelines should be scanned:
+- Root: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `CONVENTIONS.md`, `BLACKBOX.md`, `GOO.md`, `.lncd.md`
+- Directories: `.cursor/rules/`, `.github/`, `.claude/`, `.windsurf/`, `.junie/`, `.aider.conf.yml`
+- Patterns: `*.md` files containing: rules, conventions, guidelines, guidelines, standards, patterns
 
-## Your Workflow
+CRITICAL: Scan ALL `*.md` files in the project root and subdirectories. Any file that contains project rules, conventions, or guidelines MUST be read and processed.
 
-**IMPORTANT**: 
-- When presenting options or lists, always use numbered format with each item on a separate line for better visibility
-- Only implement what is requested - do not add extra features or improvements unless explicitly asked
+**Step 2: Scan Project Docs**
+Read: `*.md`, `docs/`, `ARCHITECTURE.md`, `ADR*.md`
+Keywords: rules, conventions, guidelines, architecture, patterns, standards
 
-Follow this order strictly:
+**Step 3: Extract Rules**
+Search for: `## Rules`, `## Conventions`, `## Guidelines`, `- DO:`, `- DON'T:`, `- Always:`, `- Never:`
+Categorize: naming, formatting, architecture, testing, git, security, DO/DON'T
 
-### Phase 1: Discovery (Read Before Acting)
-1. Read ALL markdown files in the project root (*.md)
-2. Read ALL markdown files in {{docsFolder}}/ directory
-{{#referencePaths}}3. Review additional references: {{referencePaths}}{{/referencePaths}}
-4. Analyze the existing codebase to understand:
-   - How similar features are structured
-   - Established patterns and conventions
-   - Architecture and component relationships
-   - API contracts and interfaces
-   - Dependencies and external services
+If rules found: "I found [N] rules. Document in AGENTS.md for consistency?"
 
-### Phase 2: Planning (Document Before Coding)
+**Step 4: Detect Conflicts**
+Compare rules. Count frequency. Note sources.
 
-5. **IMPORTANT - Feature Numbering**: Each feature gets an incremental number:
-   - Check if `{{specsFolder}}/` folder exists
-   - If yes, look for existing folders matching pattern `N-name` (e.g., `1-add-feature`, `2-fix-bug`)
-   - IMPORTANT: If a folder with `{number}-{user-feature-name}` already exists, DO NOT overwrite it - create a new one with the next available number for that feature name
-   - Find the highest number used for this specific feature name and add 1 (e.g., if `add-payment` exists with numbers 1, 2, and 3, new number is 4)
-   - If no existing specs for this feature name, start with 1
-   - The generated spec name format: `{number}-{user-feature-name}`
-      - User wrote: `add-payment`
-      - If `1-add-payment` and `2-add-payment` exist: spec name becomes `3-add-payment`
-   - Replace `{SPEC-NAME}` with this generated name in all paths below
+{{#hasConflicts}}
+## ⚠️ CONFLICTS DETECTED
 
-6. Create folder structure:
-   ```
-   mkdir -p {{specsFolder}}/{SPEC-NAME}
-   mkdir -p {{docsFolder}}
-   ```
-7. Add to .gitignore:
-   ```
-   {{specsFolder}}/
-   .env
-   ```
-   **CRITICAL**: NEVER commit environment files with secrets
+For each conflict, present:
+```
+CONFLICT: [TYPE]
 
-8. {{#createWorktree}}Create git worktree:
-   ```
-   git worktree add {{specsFolder}}/.worktrees/{SPEC-NAME} {{targetBranch}}
-    git checkout -b {{type}}/{{featureName}} {{targetBranch}}
-   ```
-   {{/createWorktree}}
-   {{^createWorktree}}Create feature branch:
-   ```
-   git fetch --all
-   git pull origin {{targetBranch}}
-   git checkout -b {{type}}/{{featureName}} {{targetBranch}}
-   ```
-   {{/createWorktree}}
+1. [rule] - Referenced Nx in [file]
+2. [rule] - Referenced Nx in [file]
+N. Other (specify)
 
-9. Generate context and plan files in `{{specsFolder}}/{SPEC-NAME}/`:
+Which rule? [1/N]
+```
 
-    Document the current state based on your analysis (save to `{{specsFolder}}/{SPEC-NAME}/context.md`):
-    - Architecture: System design, main components, data flow
-    - Tech Stack: Languages, frameworks, libraries, tools used
-    - Patterns: Coding conventions, architectural patterns
-    - Current Status: What exists that relates to this feature
-    - Technical Debt: Known issues, outdated code, areas needing attention
-    - Constraints: Limitations, requirements, non-functional considerations
+After selection:
+1. Use rule from [FILE-A] (remove from [FILE-B])
+2. Use rule from [FILE-B] (remove from [FILE-A])
+3. Keep both
+4. Other (user specifies)
 
-10. Generate `{{specsFolder}}/{SPEC-NAME}/plan.md`:
+If normalize chosen → add Step 0 task.
+Document decision in AGENTS.md?
+{{/hasConflicts}}
 
-    Structure the plan in two dimensions:
+{{^hasArchitecture}}
+## ⚠️ ARCHITECTURE NOT DETECTED
 
-    **A) By Functionality (group related features together)**
-    Break down the feature into logical functional units.
+What architecture?
+1. Hexagonal  2. Layered  3. Clean  4. MVC  5. Event-Driven  6. Microservices  7. Modular Monolith  8. Other
 
-    **B) By Technical Complexity (within each functional unit)**
-    - Step 1: Simplest to implement
-    - Step 2: Medium complexity
-    - Step 3: Most complex
+Document in AGENTS.md?
+{{/hasArchitecture}}
 
-    Example structure:
+## PHASE 2: PLANNING
+
+5. **Feature Numbering**: Check `{{specsFolder}}/`. Pattern: `{N}-{name}`. If exists, increment.
+
+{{#normalizeSteps}}
+6. **Step 0: Normalize Conventions**
+{{normalizeSteps}}
+{{/normalizeSteps}}
+
+7. Create folders: `{{specsFolder}}/{SPEC-NAME}/`, `{{docsFolder}}/`
+8. Add to `.gitignore`: `{{specsFolder}}/`, `.env`
+9. {{#createWorktree}}Create worktree: `git worktree add ...`{{/createWorktree}}{{^createWorktree}}Create branch: `git checkout -b {{type}}/{{featureName}}`{{/createWorktree}}
+
+10. **Generate context.md** with:
+    - User's Vision (refined)
+    - AI Config Files Detected + Rules extracted
+    - Conflicts Resolved
+    - Architecture + Tech Stack + Patterns
+    - Project Conventions (naming, formatting, testing, security)
+    - Current Status + Technical Debt + Constraints
+    - Decisions Made
+    - Step-by-Step Mode: [pause before each / proceed]
+    - Plan Summary (one-line of each step)
+
+11. **Generate plan.md**:
+
+    Structure by Functionality + Complexity (simplest first).
+    
+    **CRITICAL: Each step MUST follow this exact format.
+    DO NOT skip any section. DO NOT use placeholders. FILL EVERYTHING.**
+
     ```
-    ## Functional Unit 1: [Name]
-    - [ ] Step 1: [Simplest task]
-    - [ ] Step 2: [Medium task]
-    - [ ] Step 3: [Complex task]
+    ### Step N: [Name]
+    [ ] not started  [x] completed
+    
+    Description: [What this step does. Be specific.]
+    
+    RULES FOR THIS STEP (MANDATORY - copy ALL relevant rules directly):
+    - MUST: [Copy rule from config files - e.g., Naming: camelCase for functions]
+    - MUST: [Copy rule from config files - e.g., Indentation: 2 spaces]
+    - MUST: [Copy rule from config files - e.g., Error handling: use Either pattern]
+    DO NOT write "see AGENTS.md" - COPY THE ACTUAL RULE HERE.
+    
+    MANDATORY CHECKS (verify ALL before coding):
+    - REUSE: Search existing code [methods/DTOs/services]. NO duplication.
+    - PERFORMANCE: Is solution performant? Any N+1 queries?
+    - BROWNFIELD: If modifying existing code, what uses it? Impact?
+    - CONSISTENCY: Does it follow project patterns?
+    - SECURITY: Input validation? Auth? Output sanitization?
+    
+    ARCHITECTURE REMINDER (MANDATORY):
+    - MUST: Respect {{architecture}} architecture
+    - MUST: [Copy specific architecture rules - e.g., keep domain/application/infrastructure separation]
+    
+    Acceptance Criteria: [What defines success. Be measurable.]
+    Dependencies: [What must be done first.]
     ```
 
-    **General Technical Guidelines:**
-    - Foundation: Basic data structures, models, core interfaces
-    - Core: Main implementation, primary use cases
-    - Integration: External APIs, databases, event handlers
-    - Polish: Error handling, validation, security, performance
+12. **Show plan with numbered steps.**
 
-    **Error Handling and Observability:**
-    - **Logging**: Only log on errors, never for successful operations
-    - **Log Context**: Propagate errors to the appropriate layer where full context is available
-    - **Resilience**: Implement retry with exponential backoff, fallback behavior, timeouts, circuit breaker
+    "Does this match your vision?
+    - Step 1: [summary] ✓?
+    - Step 2: [summary] ✓?
+    - ..."
+    
+    Refine until user approves.
 
-    For each step include:
-    - [ ] not started, [x] completed
-    - Description, technical notes, dependencies, acceptance criteria
+    "Pause before each step for validation?
+    [Yes / No]"
 
-11. **MANDATORY**: Show the plan to the user for review and approval. Do NOT proceed with implementation until the user approves the plan.
+## PHASE 3: IMPLEMENTATION
 
-### Phase 3: Implementation (after user approves the plan)
-12. Implement by functional units, following complexity order (simplest first)
-13. Write tests alongside code
-14. Run linters and fix issues
-15. Commit incrementally with clear messages
+13. Implement by functional units, simplest first
+14. Write tests alongside code
+15. Run linters, fix issues
 
-### Phase 4: Quality Assurance
-16. Run all code review tools (linters, static analyzers, type checkers, security scanners)
-17. Run tests (only report failures to minimize tokens, aim for 100% coverage)
-18. Code cleanup:
-    - Remove debug code (console.log, print, etc.)
-    - Remove unused imports, variables, dependencies
-    - Replace magic numbers/strings with named constants
-19. Update documentation and code comments
+After each step, log:
+```
+## Step N Log
+- Implemented: [what]
+- Decisions: [why]
+- Issues: [if any]
+- Files: [created/modified]
+```
 
-### Phase 5: Delivery
-20. Review the plan and check all tasks completed
-{{#docsFolder}}21. Before creating technical docs, check if {{docsFolder}}/ is empty. If empty, create a general feature documentation file:
-   - `{{docsFolder}}/{SPEC-NAME}.md` - General overview of this feature including:
-     - Feature purpose and goals
-     - Main components and their responsibilities
-     - User interactions and flows
-     - Key decisions made during implementation
-     - Current status and next steps
+16. Commit incrementally
 
-22. Generate technical documentation in {{docsFolder}}/:
-    - `architecture.md` - System design and components
-    - `api-externals.md` - External API contracts, endpoints
-    - `data-models.md` - Data structures, schemas
-    - `dependencies.md` - External services and libraries
-{{/docsFolder}}
-23. Before creating the PR, validate and list any missing items:
-    - Pending tasks from the plan
-    - Missing tests or documentation
-    - Any security or quality issues
-    - Suggest how to address these items
-    - **WAIT for user approval before creating the PR**
-24. After user approval, create the PR:
-    - Title: {{#prName}}{{prName}}{{/prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}
-    - Source: {{type}}/{{featureName}} from {{targetBranch}}
-    {{#jiraTicket}}
-    - Issue Tracker: {{jiraTicket}}
-    - After creating the PR, add the PR link to the issue tracker ticket ({{jiraTicket}}) for bidirectional reference
-    {{/jiraTicket}}
-    - Labels: {{tags}}
-    - Draft: {{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}
-25. Save this prompt to `{{specsFolder}}/{SPEC-NAME}/initial-prompt.md`
+## PHASE 4: QA
 
----
+17. Run: linters, static analyzers, type checkers, security scanners
+18. Run tests (aim 100% coverage)
+19. Cleanup: remove debug code, unused imports, magic numbers
+20. Update docs and comments
 
-## Feature Description (from user)
+Post-Development: "Check existing tests to update?"
 
-User input (can be text or path to reference document):
+## PHASE 5: DELIVERY
+
+21. Review plan, verify all tasks done
+22. {{#docsFolder}}Generate docs in `{{docsFolder}}/`: architecture.md, api-externals.md, data-models.md, dependencies.md{{/docsFolder}}
+23. Pre-PR checklist:
+    - Pending tasks?
+    - Missing tests/docs?
+    - Security issues?
+    Wait for user approval.
+24. Create PR: Title `{{prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}`, Labels `{{tags}}`, Draft `{{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}`
+25. {{#jiraTicket}}Link PR to {{jiraTicket}}{{/jiraTicket}}
+26. Save prompt to `{{specsFolder}}/{SPEC-NAME}/initial-prompt.md`
+
+## REFERENCE
+
 **What it does:** {{functionalDesc}}
+{{#technicalDesc}}**Technical:** {{technicalDesc}}{{/technicalDesc}}
 
-{{#technicalDesc}}**Technical requirements:** {{technicalDesc}}{{/technicalDesc}}
+After reading docs, refine and present this vision.
 
-**IMPORTANT:** After reading documentation and analyzing the codebase, process these descriptions:
-1. If the input contains file paths or URLs, read those documents and extract relevant information
-2. Reorganize and clarify the ideas - the user may have written them poorly
-3. Break down into clear, ordered requirements from simplest to most complex
-4. Add any missing context based on your analysis
-5. Present the refined version in your response
+## PRINCIPLES (APPLY ALWAYS)
 
-The refined descriptions will be included in the final initial-prompt.md that you save at the end.
+- SOLID, YAGNI, DRY, KISS
+- Descriptive names, reuse code
+- Only log on errors
+- Resilience: retry, timeouts, circuit breaker
 
----
+## SECURITY (VERIFY)
 
-## Technical Principles
+NEVER hardcode secrets. If found → CRITICAL ERROR, ask user.
 
-- **SOLID**: Single responsibility, Open/closed, Liskov substitution, Interface segregation, Dependency inversion
-- **YAGNI**: You Aren't Gonna Need It - don't add functionality until necessary
-- **DRY**: Don't Repeat Yourself - extract common logic
-- **KISS**: Keep It Simple - favor simple solutions
-
-**Code Quality:**
-- Descriptive names for variables, methods, components
-- Reuse methods and components; extract common logic into utils/helpers
-
-## Security Checklist
-
-**CRITICAL:**
-- NEVER hardcode API keys, tokens, passwords, or secrets
-- NEVER expose credentials in logs or error messages
-- Flag any hardcoded secrets as CRITICAL ERROR and ask user how to handle
-
-Also verify:
-- Input validation, output sanitization
-- SQL injection prevention, XSS prevention
-- Authentication/authorization enforced
-- Rate limiting, CORS configured, HTTPS enforced
-
-## Communication Protocol
-
-**ASK THE USER** if you:
-- Have doubts about requirements or implementation
-- Need clarification on any ticket or document
-- Are unsure about architectural decisions
-- Encounter blockers you cannot resolve
-- Want to deviate from the plan
-
-**NEVER** make assumptions when unclear. Ask first.
-
----
-
-Start by reading the documentation, analyze the codebase, and ask me your doubts before proceeding.
+Verify: input validation, SQL/XSS prevention, auth, rate limiting.
 </script>
 
 <script nonce="{{nonce}}">
   let currentType = 'feature';
+  let currentArchitecture = null;
 
   const baseTags = [
     { id:'bug', cls:'r' },
@@ -843,6 +923,12 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     renderTags(); updatePreview();
   }
 
+  function setArchitecture(arch) {
+    currentArchitecture = arch;
+    document.querySelectorAll('.arch-btn').forEach(b => b.classList.toggle('on', b.dataset.arch === arch));
+    saveState();
+  }
+
   function sanitize(el) {
     el.value = el.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
   }
@@ -854,6 +940,15 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     if (manual)    el.innerHTML = `<span>→</span> <code>${manual}</code>`;
     else if (feat) el.innerHTML = `<span>→</span> <code>${currentType}/${feat}</code> <span class="badge-auto">auto</span>`;
     else           el.innerHTML = `<span style="color:var(--dim)">AI will generate the name</span>`;
+  }
+
+  function updateArchitectureStatus() {
+    const el = document.getElementById('aiConfigStatus');
+    if (currentArchitecture) {
+      el.innerHTML = `<span class="detected">✓ Architecture: ${currentArchitecture}</span>`;
+    } else {
+      el.innerHTML = `<span class="detected-none">⚠ Not detected - please select</span>`;
+    }
   }
 
   function renderTags() {
@@ -904,19 +999,6 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     return ok;
   }
 
-  function renderTemplate(template, data) {
-    return template.replace(/\{\{(#|\^)?([a-zA-Z0-9.]+)\}\}/g, (match, type, key) => {
-      const value = key.split('.').reduce((obj, k) => obj?.[k], data);
-      if (type === '#') {
-        return value ? data.__block : '';
-      }
-      if (type === '^') {
-        return value ? '' : (data.__blocks?.[key] || '');
-      }
-      return value !== undefined && value !== null ? value : '';
-    });
-  }
-
   function generatePrompt() {
     if (!validate()) return;
     
@@ -936,6 +1018,8 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     const dr   = document.getElementById('isDraft').checked;
     const cw   = document.getElementById('createWorktree').checked;
     const tags = getTags();
+    const arch = currentArchitecture || document.getElementById('customArchitecture').value.trim() || null;
+    const archDetails = tD || null;
 
     const data = {
       project: proj,
@@ -952,6 +1036,13 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
       isDraft: dr,
       createWorktree: cw,
       tags: tags.join(', '),
+      architecture: arch,
+      architectureDetails: archDetails,
+      hasArchitecture: !!arch,
+      hasConflicts: false,
+      conflicts: '',
+      normalizeSteps: '',
+      rules: '',
       __blocks: {}
     };
 
@@ -1010,6 +1101,10 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     document.querySelectorAll('.err').forEach(e => e.classList.remove('err'));
     document.querySelectorAll('.ferr').forEach(e => e.classList.remove('on'));
     setType('feature');
+    currentArchitecture = null;
+    document.querySelectorAll('.arch-btn').forEach(b => b.classList.remove('on'));
+    document.getElementById('customArchitecture').value = '';
+    updateArchitectureStatus();
     document.getElementById('jsonOut').style.display = 'none';
     document.getElementById('jsonPh').style.display = 'block';
     document.getElementById('btnCopy').style.display = 'none';
@@ -1031,6 +1126,8 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
       functionalDesc: document.getElementById('functionalDesc')?.value ?? '',
       technicalDesc: document.getElementById('technicalDesc')?.value ?? '',
       currentType,
+      currentArchitecture,
+      customArchitecture: document.getElementById('customArchitecture')?.value ?? '',
       tags: getTags(),
       output: document.getElementById('jsonOut')?.textContent ?? '',
       outputVisible: document.getElementById('jsonOut')?.style.display !== 'none',
@@ -1050,13 +1147,22 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     setVal('referencePaths', state.referencePaths);
     setVal('functionalDesc', state.functionalDesc);
     setVal('technicalDesc', state.technicalDesc);
+    setVal('customArchitecture', state.customArchitecture);
 
     document.getElementById('isDraft').checked = !!state.isDraft;
     document.getElementById('createWorktree').checked = !!state.createWorktree;
 
     setType(state.currentType || 'feature');
 
-    // Restore tag checks (after renderTags)
+    if (state.currentArchitecture) {
+      setArchitecture(state.currentArchitecture);
+    }
+
+    renderTags();
+    updateDraftTags();
+    updatePreview();
+    updateArchitectureStatus();
+
     if (Array.isArray(state.tags)) {
       state.tags.forEach((t) => {
         const cb = document.getElementById(`tag-${t}`);
@@ -1066,9 +1172,6 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
         }
       });
     }
-
-    updateDraftTags();
-    updatePreview();
 
     if (state.output) {
       const pre = document.getElementById('jsonOut');
@@ -1084,7 +1187,7 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
   }
 
   function bindStatePersistence() {
-    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc'];
+    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc','customArchitecture'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1104,6 +1207,11 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     document.getElementById('btnTypeFeature')?.addEventListener('click', () => setType('feature'));
     document.getElementById('btnTypeFix')?.addEventListener('click', () => setType('fix'));
     document.getElementById('btnTypeMigration')?.addEventListener('click', () => setType('migration'));
+    document.getElementById('btnArchHex')?.addEventListener('click', () => { setArchitecture('Hexagonal'); updateArchitectureStatus(); });
+    document.getElementById('btnArchLayered')?.addEventListener('click', () => { setArchitecture('Layered'); updateArchitectureStatus(); });
+    document.getElementById('btnArchClean')?.addEventListener('click', () => { setArchitecture('Clean'); updateArchitectureStatus(); });
+    document.getElementById('btnArchMvc')?.addEventListener('click', () => { setArchitecture('MVC'); updateArchitectureStatus(); });
+    document.getElementById('btnArchMono')?.addEventListener('click', () => { setArchitecture('Modular Monolith'); updateArchitectureStatus(); });
     document.getElementById('btnGenerate')?.addEventListener('click', generatePrompt);
   }
 
@@ -1113,6 +1221,11 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
     });
     document.getElementById('prName')?.addEventListener('input', updatePreview);
     document.getElementById('isDraft')?.addEventListener('change', updateDraftTags);
+    document.getElementById('customArchitecture')?.addEventListener('input', () => {
+      currentArchitecture = document.getElementById('customArchitecture').value.trim() || null;
+      updateArchitectureStatus();
+      saveState();
+    });
   }
 
   function bindWebviewMessages() {
@@ -1133,7 +1246,6 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
       }
 
       if (msg.type === 'initContext') {
-        // Only set defaults when empty
         const proj = document.getElementById('project');
         if (proj && !proj.value && msg.workspaceFolder) {
           proj.value = msg.workspaceFolder;
@@ -1145,6 +1257,7 @@ Start by reading the documentation, analyze the codebase, and ask me your doubts
 
   renderTags();
   updatePreview();
+  updateArchitectureStatus();
 
   bindButtons();
   bindFormInputs();
