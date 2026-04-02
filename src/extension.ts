@@ -14,7 +14,10 @@ class AISpecSidebarProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media')],
     };
 
-    webviewView.webview.html = this.getHtmlContent(webviewView.webview);
+    const themeKind = vscode.window.activeColorTheme.kind;
+    const isDark = themeKind === vscode.ColorThemeKind.Dark || themeKind === vscode.ColorThemeKind.HighContrast;
+
+    webviewView.webview.html = this.getHtmlContent(webviewView.webview, isDark);
 
     webviewView.webview.onDidReceiveMessage((message) => {
       switch (message.type) {
@@ -55,7 +58,7 @@ class AISpecSidebarProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private getHtmlContent(webview: vscode.Webview): string {
+  private getHtmlContent(webview: vscode.Webview, isDark: boolean): string {
     const htmlPath = path.join(this.extensionUri.fsPath, 'media', 'panel.html');
     let html = fs.readFileSync(htmlPath, 'utf8');
 
@@ -64,6 +67,7 @@ class AISpecSidebarProvider implements vscode.WebviewViewProvider {
 
     html = html.replace(/\{\{nonce\}\}/g, nonce);
     html = html.replace(/\{\{cspSource\}\}/g, cspSource);
+    html = html.replace(/\{\{theme\}\}/g, isDark ? 'dark' : 'light');
 
     return html;
   }

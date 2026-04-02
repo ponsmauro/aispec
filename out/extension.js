@@ -39,7 +39,7 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const vscode = __importStar(require("vscode"));
 const crypto = __importStar(require("crypto"));
-class AIScpecSidebarProvider {
+class AISpecSidebarProvider {
     constructor(extensionUri) {
         this.extensionUri = extensionUri;
     }
@@ -48,7 +48,9 @@ class AIScpecSidebarProvider {
             enableScripts: true,
             localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media')],
         };
-        webviewView.webview.html = this.getHtmlContent(webviewView.webview);
+        const themeKind = vscode.window.activeColorTheme.kind;
+        const isDark = themeKind === vscode.ColorThemeKind.Dark || themeKind === vscode.ColorThemeKind.HighContrast;
+        webviewView.webview.html = this.getHtmlContent(webviewView.webview, isDark);
         webviewView.webview.onDidReceiveMessage((message) => {
             switch (message.type) {
                 case 'pickFolder': {
@@ -87,20 +89,21 @@ class AIScpecSidebarProvider {
             }
         });
     }
-    getHtmlContent(webview) {
+    getHtmlContent(webview, isDark) {
         const htmlPath = path.join(this.extensionUri.fsPath, 'media', 'panel.html');
         let html = fs.readFileSync(htmlPath, 'utf8');
         const nonce = crypto.randomBytes(16).toString('base64');
         const cspSource = webview.cspSource;
         html = html.replace(/\{\{nonce\}\}/g, nonce);
         html = html.replace(/\{\{cspSource\}\}/g, cspSource);
+        html = html.replace(/\{\{theme\}\}/g, isDark ? 'dark' : 'light');
         return html;
     }
 }
-AIScpecSidebarProvider.viewType = 'aiscpec.sidebarView';
+AISpecSidebarProvider.viewType = 'aiscpec.sidebarView';
 function activate(context) {
-    const provider = new AIScpecSidebarProvider(context.extensionUri);
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider(AIScpecSidebarProvider.viewType, provider));
+    const provider = new AISpecSidebarProvider(context.extensionUri);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider(AISpecSidebarProvider.viewType, provider));
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map

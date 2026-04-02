@@ -127,9 +127,9 @@
     .sb-right { margin-left: auto; display: flex; gap: 10px; }
 
     /* ══════════════════════════════════════
-       PLUGIN UI
+       PLUGIN UI - DARK THEME (default)
     ══════════════════════════════════════ */
-    :root {
+    :root, .theme-dark {
       --bg:   #252526;
       --s1:   #1e1e1e;
       --s2:   #2d2d2d;
@@ -144,6 +144,24 @@
       --feat: #4fc1ff;
       --fix:  #f44747;
       --mig:  #c586c0;
+    }
+
+    /* LIGHT THEME */
+    .theme-light {
+      --bg:   #ffffff;
+      --s1:   #f3f3f3;
+      --s2:   #e8e8e8;
+      --b:    #d4d4d4;
+      --acc:  #0066b8;
+      --acc2: #0078d4;
+      --txt:  #333333;
+      --dim:  #6e6e6e;
+      --ok:   #16825d;
+      --warn: #a31515;
+      --err:  #d73a49;
+      --feat: #0066b8;
+      --fix:  #d73a49;
+      --mig:  #6f42c1;
     }
 
     .plugin { color: var(--txt); font-size: 12px; background: var(--bg); }
@@ -166,6 +184,12 @@
 
     /* Sections */
     .p-section { padding: 8px 8px 0; }
+    .p-section-dark { 
+      padding: 8px 8px 0; 
+      background: var(--s1); 
+      border-radius: 4px; 
+      margin: 4px 8px 8px;
+    }
     .sec-label {
       font-size: 10px; font-weight: 600; text-transform: uppercase;
       letter-spacing: .6px; color: var(--dim); margin-bottom: 6px;
@@ -188,6 +212,7 @@
     .p-input:focus { border-color: var(--acc2); outline: 1px solid var(--acc2); }
     .p-input.err   { border-color: var(--err); }
     textarea.p-input { resize: vertical; min-height: 52px; line-height: 1.45; }
+    textarea#initialStructure { min-height: 100px; }
 
     .row-13 { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin-bottom: 7px; }
     .row-13-full { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
@@ -348,7 +373,7 @@
     .ai-config-info .detected-none { color: var(--warn); }
   </style>
 </head>
-<body>
+<body class="theme-{{theme}}">
 
 <div class="vsc-window">
 
@@ -387,29 +412,60 @@
 
           <!-- Project bar -->
           <div class="proj-bar">
-            <label>Project</label>
+            <label title="Your project name (folder name)">Project</label>
             <div class="pick-row" style="flex:1;min-width:0">
-              <input class="p-input" type="text" id="project" placeholder="my-project" />
-              <button class="btn-pick" id="btnBrowse" title="Browse">
+              <input class="p-input" type="text" id="project" placeholder="my-project" title="Project folder name" />
+              <button class="btn-pick" id="btnBrowse" title="Browse for project folder">
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5L6.33 1.585A1.75 1.75 0 0 0 5.06 1H1.75z"/></svg>
               </button>
-              <button class="btn-pick" id="btnClear" title="Clear form">
+              <button class="btn-pick" id="btnClear" title="Clear all form fields">
                 Clear
               </button>
             </div>
           </div>
 
+          <!-- New Project Toggle -->
+          <div class="draft-row" style="margin-bottom:8px" title="Enable for new projects (greenfield). Creates base structure first.">
+            <span class="draft-label">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--ok)"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/></svg>
+              Is a new project
+            </span>
+            <label class="toggle">
+              <input type="checkbox" id="isNewProject" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- New Project Extras (hidden by default) -->
+          <div class="p-section-dark" id="newProjectExtras" style="display:none">
+            <div class="field">
+              <label>Tech stack <span class="req">*</span></label>
+              <input class="p-input" type="text" id="techStack" placeholder="Go 1.21, React 18, PostgreSQL" />
+            </div>
+            <div class="field">
+              <label>Additional information</label>
+              <textarea class="p-input" id="initialStructure" placeholder="- Add project structure
+- Add architecture documentation path
+- Considerations for new project
+- Any specific files or configs to include"></textarea>
+            </div>
+          </div>
+
+          <hr class="p-div">
+
           <!-- Workspace -->
           <div class="p-section">
             <div class="sec-label">Workspace</div>
-            <div class="field">
-              <label>Specs folder <span class="req">*</span></label>
-              <input class="p-input" type="text" id="specsFolder" placeholder="specs" />
-              <div class="ferr" id="e-specs">Required</div>
-            </div>
-            <div class="field">
-              <label>Docs folder</label>
-              <input class="p-input" type="text" id="docsFolder" placeholder="docs" />
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div class="field">
+                <label title="Folder where specs will be stored">Specs folder <span class="req">*</span></label>
+                <input class="p-input" type="text" id="specsFolder" placeholder="specs" title="Folder for feature specifications" />
+                <div class="ferr" id="e-specs">Required</div>
+              </div>
+              <div class="field">
+                <label title="Folder where documentation is stored">Docs folder</label>
+                <input class="p-input" type="text" id="docsFolder" placeholder="docs" title="Folder for documentation" />
+              </div>
             </div>
           </div>
 
@@ -417,20 +473,18 @@
 
           <!-- Architecture -->
           <div class="p-section">
-            <div class="sec-label">Architecture</div>
-            <div class="ai-config-info">
-              <div id="aiConfigStatus">Scanning for AI config files...</div>
-            </div>
+            <div class="sec-label" title="Project architecture pattern">Architecture</div>
             <div class="field">
-              <label>Architecture <span class="hint">(if not detected)</span></label>
-              <div class="arch-row">
-                <button class="arch-btn" id="btnArchHex" data-arch="Hexagonal" title="Hexagonal">Hex</button>
-                <button class="arch-btn" id="btnArchLayered" data-arch="Layered" title="Layered">Lay</button>
-                <button class="arch-btn" id="btnArchClean" data-arch="Clean" title="Clean">Cln</button>
-                <button class="arch-btn" id="btnArchMvc" data-arch="MVC" title="MVC">MVC</button>
-                <button class="arch-btn" id="btnArchMono" data-arch="Modular Monolith" title="Modular Monolith">MM</button>
-              </div>
-              <input class="p-input" type="text" id="customArchitecture" placeholder="Or specify other" style="margin-top:4px" />
+              <select class="p-input" id="architectureSelect" title="Select or auto-detect architecture">
+                <option value="">To be discovered</option>
+                <option value="Hexagonal">Hexagonal</option>
+                <option value="Layered">Layered</option>
+                <option value="Clean">Clean</option>
+                <option value="MVC">MVC</option>
+                <option value="Modular Monolith">Modular Monolith</option>
+                <option value="other">Other</option>
+              </select>
+              <input class="p-input" type="text" id="customArchitecture" placeholder="Specify architecture" style="margin-top:4px; display:none" title="Enter custom architecture name" />
             </div>
           </div>
 
@@ -440,11 +494,22 @@
           <div class="p-section">
             <div class="sec-label">Feature</div>
             <div class="field">
-              <label>Name <span class="req">*</span> <span class="hint">(use '-', no spaces)</span></label>
-              <input class="p-input" type="text" id="featureName" placeholder="add-payment-webhook" />
+              <label title="Feature name (kebab-case, no spaces)">Name <span class="req">*</span> <span class="hint">(use '-', no spaces)</span></label>
+              <input class="p-input" type="text" id="featureName" placeholder="add-payment-webhook" title="Feature name in kebab-case" />
               <div class="ferr" id="e-feat">Letters, numbers and '-' only</div>
             </div>
-            <div class="row-13">
+            <div class="field">
+              <label title="Issue tracker ticket ID (optional)">Issue tracker ID <span class="hint">(e.g. PROJ-123)</span></label>
+              <input class="p-input" type="text" id="jiraTicket" placeholder="PROJ-123" title="Jira/issue tracker ticket ID" />
+            </div>
+          </div>
+
+          <hr class="p-div">
+
+          <!-- Git -->
+          <div class="p-section">
+            <div class="sec-label">Git</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:8px;">
               <div class="field" style="margin-bottom:0">
                 <label>Base branch <span class="req">*</span></label>
                 <input class="p-input" type="text" id="targetBranch" value="develop" />
@@ -452,50 +517,37 @@
               </div>
               <div class="field" style="margin-bottom:0">
                 <label>Type <span class="req">*</span></label>
-                <div class="type-row">
-                  <button class="type-btn on" id="btnTypeFeature" data-type="feature" title="Feature">F</button>
-                  <button class="type-btn" id="btnTypeFix" data-type="fix" title="Fix">B</button>
-                  <button class="type-btn" id="btnTypeMigration" data-type="migration" title="Migration">M</button>
-                </div>
+                <input class="p-input" type="text" id="branchType" placeholder="feature, fix, chore..." />
               </div>
-              <div class="draft-row row-13-full" style="margin-top:0;margin-bottom:0;">
-                <span class="draft-label">Create as git worktree</span>
+            </div>
+            <div class="field">
+              <label>Branch name <span class="hint">(override)</span></label>
+              <input class="p-input" type="text" id="prName" placeholder="Leave empty for auto-generation" />
+              <div class="pr-prev" id="prPreview"></div>
+            </div>
+            <div class="field">
+              <div class="field">
+              <label>Tags</label>
+              <div class="tags" id="tagsWrap"></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="draft-row">
+                <span class="draft-label">Git worktree</span>
                 <label class="toggle">
                   <input type="checkbox" id="createWorktree" />
                   <span class="slider"></span>
                 </label>
               </div>
-            </div>
-          </div>
-
-          <hr class="p-div">
-
-          <!-- Pull Request -->
-          <div class="p-section">
-            <div class="sec-label">Pull Request</div>
-            <div class="field">
-              <div class="field">
-              <label>Issue tracker ID <span class="hint">(e.g. PROJ-123)</span></label>
-              <input class="p-input" type="text" id="jiraTicket" placeholder="https://jira.company.com/browse/PROJ-123" />
-            </div>
-            <div class="field">
-              <label>PR name <span class="hint">(empty = auto)</span></label>
-              <input class="p-input" type="text" id="prName" placeholder="Leave empty for auto-generation" />
-              <div class="pr-prev" id="prPreview"></div>
-            </div>
-            <div class="draft-row">
-              <span class="draft-label">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--warn)"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086z"/></svg>
-                Open as <strong style="color:var(--warn);margin-left:3px">Draft</strong>
-              </span>
-              <label class="toggle">
-                <input type="checkbox" id="isDraft" checked />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="field">
-              <label>Tags</label>
-              <div class="tags" id="tagsWrap"></div>
+              <div class="draft-row">
+                <span class="draft-label">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--warn)"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086z"/></svg>
+                  Draft
+                </span>
+                <label class="toggle">
+                  <input type="checkbox" id="isDraft" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
           </div>
 
@@ -509,6 +561,16 @@
               <textarea class="p-input" id="referencePaths" placeholder="/docs/context.md
 /docs/architecture/adr-001.md
 /CONTRIBUTING.md"></textarea>
+            </div>
+            <div class="field">
+              <label>Project scan scope</label>
+              <div class="pick-row">
+                <select class="p-input" id="scanScope">
+                  <option value="relevant">Scan only relevant (Recommended)</option>
+                  <option value="full">Scan entire project</option>
+                </select>
+              </div>
+              <div class="ferr" id="e-scanScope"></div>
             </div>
           </div>
 
@@ -524,14 +586,14 @@
             </div>
             <div class="field">
               <label>Technical</label>
-              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies... (or path to reference doc)"></textarea>
+              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies, API (swagger/openapi), etc... (or path to reference doc)"></textarea>
             </div>
           </div>
 
           <!-- Actions -->
           <div class="p-actions">
-<button class="p-btn p-btn-primary" id="btnGenerate" onclick="generatePrompt()">
-              Generate Prompt
+            <button class="p-btn p-btn-primary" id="btnGenerate" onclick="generatePrompt()">
+              Generate & Copy
             </button>
           </div>
 
@@ -602,297 +664,622 @@
 <script type="text/template" id="promptTemplate">
 # AI Feature Development Assistant
 
-## CONSTRAINTS (NON-NEGOTIABLE)
+## HOW TO WORK WITH THIS PROMPT
+0. **SWITCH TO PLAN MODE** - This is a DISCOVERY and PLANNING phase. Do NOT write code until Step 6. Focus on analysis, documentation, and planning first.
+1. Read the ENTIRE prompt before doing anything
+2. Follow steps in ORDER (1 → 2 → 3 → 4 → 5 → 6 → 7)
+3. Ask for validation BEFORE moving to next step
+4. If something is unclear, ASK - don't assume
+5. At EVERY step, give the user the opportunity to:
+   - Approve and continue
+   - Request changes
+   - Ask questions
+   - Go back to previous steps if needed
 
-DO:
-- Follow the plan step by step in order
-- Copy ALL rules directly into each plan step
-- Verify mandatory checks before each step
-- Ask user for validation before each step (if requested)
-- Implement tests alongside code
-- Use numbered format for all options
+---
 
-NEVER:
-- Skip steps or change order
-- Add features not in the plan
-- Reference files for rules (COPY THEM)
-- Implement without user approval
-- Make assumptions (ASK)
-- Ignore mandatory checks
-- Hardcode secrets
+## PROGRESS CHECKLIST (Update as you go)
+- [ ] Step 1: Input Data Confirmed (Parts A, B, C)
+- [ ] Step 2: Rules Displayed & Understood
+- [ ] Step 3: prompt-init.md Created
+- [ ] Step 4: context.md Created (project scanned)
+- [ ] Step 5: plan.md Created (all steps defined)
+- [ ] Step 6: Implementation Complete (all steps done)
+- [ ] Step 7: Finalized (docs, tests, PR ready)
 
-CRITICAL:
-- MUST copy ALL rules from config files into each step
-- MUST verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY before coding
-- MUST respect {{architecture}} architecture
-- MUST NOT commit credentials
+---
 
-IF UNSURE: Ask the user
-IF BLOCKED: Ask the user
-IF CONFLICT: Ask the user
-IF NOT IN PLAN: Ask the user
-NEVER guess or assume
+## STEP 1: CONFIRM INPUT DATA
+This step has 3 parts - complete each part and wait for approval.
 
-## OUTPUT FORMAT (ALWAYS USE)
+### Part A: Basic Input Data
+⚠️ IMPORTANT: In this step, ONLY read the files referenced in Reference docs if they are file paths. DO NOT read any other project files.
 
-When presenting plans, ALWAYS use:
+Show basic data (WITHOUT functional/technical descriptions):
+
+```
+## Basic Input Data:
+1. Workspace/Project: {{project}}
+2. Specs folder: {{specsFolder}}/
+3. Docs folder: {{docsFolder}}/
+4. Architecture: {{architecture}}
+5. Feature name: {{featureName}}
+6. Base branch: {{targetBranch}}
+7. Branch name: {{type}}/{{featureName}}
+8. Branch type: {{type}}
+{{#createWorktree}}9. Create as git worktree: YES{{/createWorktree}}
+{{#prName}}10. Custom branch name: {{prName}}{{/prName}}
+{{#issueTracker}}11. Issue tracker: {{issueTracker}}{{/issueTracker}}
+12. Draft: {{isDraft}}
+13. Tags: {{tags}}
+{{#referencePaths}}14. Reference docs (READ these if file paths):
+{{#each referencePaths}}  - {{this}}
+{{/each}}
+{{/referencePaths}}
+```
+
+Ask: "Is this data correct? Let me know if you want to change anything (reference the number)."
+
+**Checklist Part A:**
+- [ ] 1. All basic data displayed
+- [ ] 2. User approved
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+### Part B: Functional Description
+If {{functionalDesc}} contains a file path, READ that file first.
+Then REFINE and present clearly:
+
+```
+## Functional Description (REFINED):
+[Rewrite to be clearer - fix typos, clarify intent]
+[Include key points from referenced docs]
+```
+
+**If user says "not correct" or wants changes:**
+→ Ask: "What should be different?"
+→ Update and show again
+→ Wait for approval
+
+**Checklist Part B:**
+- [ ] 1. Description refined and clear
+- [ ] 2. User approved
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+### Part C: Technical Description
+If {{technicalDesc}} contains a file path, READ that file first.
+Then REFINE and present clearly:
+
+```
+## Technical Description (REFINED):
+{{#technicalDesc}}[Rewrite to be clearer - clarify stack, patterns, dependencies]
+[Include key points from referenced docs]{{/technicalDesc}}{{^technicalDesc}}(none){{/technicalDesc}}
+```
+
+**If user says "not correct" or wants changes:**
+→ Ask: "What should be different?"
+→ Update and show again
+→ Wait for approval
+
+**Checklist Part C:**
+- [ ] 1. Description refined and clear
+- [ ] 2. User approved
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+## STEP 2: SHOW PLUGIN RULES
+Display all rules that must be followed throughout the project.
+
+**Action**: Show the complete rule set:
+
+```
+## Plugin Rules (MANDATORY)
+
+### Workflow Rules
+- ✅ Follow steps in ORDER (1→2→3→4→5→6→7)
+- ✅ Copy rules INTO each plan step (NOT at top, NOT referenced) - MANDATORY
+- ✅ Check REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
+- ✅ Ask user for validation before each step
+- ✅ Document each step in plan.md
+- ✅ For each step: FIRST write code, THEN run ALL review tools (linters, formatters, type checkers, security scanners, static analyzers, IDE plugins), ONLY when all pass → run tests
+- ✅ Check for AI agent config files (CLAUDE.md, .cursorrules, .windsurfrules, AGENTS.md, etc.) and INCLUDE their rules
+
+### Forbidden
+- ❌ NEVER skip or change step order
+- ❌ NEVER reference rules (must COPY them - MANDATORY)
+- ❌ NEVER implement without user approval
+- ❌ NEVER hardcode secrets
+- ❌ NEVER run tests before all review tools pass
+- ❌ NEVER leave magic strings or magic numbers in code - MUST replace with named constants
+
+### Per-Step Validation
+- 1. Rules copied INTO this step
+- 2. REUSE checked - "Does this already exist? Can I reuse existing code?"
+- 3. ARCHITECTURE checked - "Does this comply with the referenced architecture ({{architecture}})?"
+- 4. PERFORMANCE checked
+- 5. BROWNFIELD checked
+- 6. CONSISTENCY checked
+- 7. SECURITY checked
+- 8. Tests written
+- 9. Linters pass
+```
+
+**Rules for this step:**
+- ✅ Display ALL rules clearly
+- ✅ Use ✅ for required, ❌ for forbidden
+- ✅ Wait for user approval to confirm understanding
+
+**Checklist:**
+- [ ] 1. All rules displayed
+- [ ] 2. User approved understanding
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+## STEP 3: CREATE prompt-init.md
+Create the setup file with all input data and rules.
+
+⚠️ IMPORTANT: The specs folder is created WITHIN the project (in the workspace root), not as a separate location.
+
+{{^isNewProject}}
+**IMPORTANT**: Before creating any branch, you MUST:
+1. Run `git fetch origin` to get latest refs
+2. Run `git pull origin {{targetBranch}}` to ensure you have the latest code from base branch
+{{/isNewProject}}
+
+{{#isNewProject}}
+**IMPORTANT**: This is a NEW project (greenfield). No git pull needed - the project doesn't exist yet.
+{{/isNewProject}}
+
+**Action**: Create file at `{{project}}/{{specsFolder}}/{{featureName}}/prompt-init.md`
+
+**Output** (this is what you must write to the file):
+```
+# {{featureName}}
+
+## Project Info
+- Project: {{project}}
+- Project type: {{#isNewProject}}Greenfield (new){{/isNewProject}}{{^isNewProject}}Brownfield (existing){{/isNewProject}}
+- Feature: {{featureName}}
+- Type: {{type}}
+{{#prName}}- Custom branch name: {{prName}}{{/prName}}
+{{^prName}}- Branch: {{type}}/{{featureName}}{{/prName}}
+{{^isNewProject}}- Target: {{targetBranch}}
+- Base branch synced: YES (git fetch + git pull executed){{/isNewProject}}
+{{#createWorktree}}- Create as git worktree: YES{{/createWorktree}}
+{{#issueTracker}}- Issue tracker: {{issueTracker}}{{/issueTracker}}
+- Draft: {{isDraft}}
+- Tags: {{tags}}
+
+{{#isNewProject}}
+## Tech Stack
+{{techStack}}
+
+## Additional Information
+{{initialStructure}}
+{{/isNewProject}}
+
+## Directories
+- Specs: {{specsFolder}}/
+- Docs: {{docsFolder}}/
+
+## Functional Description
+[Use the REFINED version from Step 1 Part B - include user's corrections]
+
+## Technical Description
+[Use the REFINED version from Step 1 Part C - include user's corrections]
+
+{{#referencePaths}}
+## References
+{{#each referencePaths}}- {{this}}
+{{/each}}
+{{/referencePaths}}
+
+## Rules to Follow
+[Copy ALL rules from Step 2 here - this is your reference]
+
+## AI Agent Configuration
+[If any AI agent config files were found (CLAUDE.md, .cursorrules, .windsurfrules, AGENTS.md, etc.), copy their rules here]
+[Specify which agent this is for and any specific constraints]
+```
+
+**Instructions for this step:**
+1. Copy ALL rules from Step 2 into the file
+2. Use REFINED descriptions from Step 1 Parts B and C
+3. This file is the main reference for the entire project
+
+**Checklist:**
+- [ ] 1. File created at correct path
+- [ ] 2. All data included
+- [ ] 3. All rules copied
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+## STEP 4: READ PROJECT & CREATE context.md
+{{^isNewProject}}
+Scan the project to understand existing patterns and extract rules.
+
+**Scan scope**: {{scanScope}} ({{#ifEquals scanScope "relevant"}}recommended - focus on src/, config files, docs, and AI config files{{/ifEquals}}{{#ifEquals scanScope "full"}}full project scan{{/ifEquals}})
+
+**Action**: Scan project and create context file at `{{project}}/{{specsFolder}}/{{featureName}}/context.md`
+
+{{#ifEquals scanScope "relevant"}}
+**Must scan (relevant files only):**
+1. AI config files: AGENTS.md, CLAUDE.md, .cursorrules, .windsurfrules, CONVENTIONS.md, BLACKBOX.md
+2. Source directories for code patterns (based on tech stack: src/, app/, lib/, internal/, etc.)
+3. Config files based on tech stack (package.json, go.mod, pom.xml, Cargo.toml, pyproject.toml, etc.)
+4. Docs/ directory for existing documentation
+5. Root README and CONTRIBUTING files{{/ifEquals}}
+
+{{#ifEquals scanScope "full"}}
+**Must scan:**
+1. ALL files in the project root and subdirectories
+2. Look for: AGENTS.md, CLAUDE.md, .cursorrules, .windsurfrules, CONVENTIONS.md, BLACKBOX.md, .lncd.md, or any .md file containing rules/conventions/guidelines
+3. Scan all source directories for code patterns{{/ifEquals}}
+{{/isNewProject}}
+
+{{#isNewProject}}
+This is a NEW project (greenfield). There is no existing project to scan.
+
+**Action**: Create context file at `{{project}}/{{specsFolder}}/{{featureName}}/context.md`
+
+**Use the information provided in prompt-init.md:**
+- Tech stack: {{techStack}}
+- Additional information: {{initialStructure}}
+- Reference any industry best practices for the tech stack mentioned
+{{/isNewProject}}
+
+**Output** (this is what you must write to the file):
+```
+# Context - {{featureName}}
+
+{{^isNewProject}}
+## Project Analysis
+[What you found when reading the project]
+
+## Architecture Detected
+[{{architecture}} or what you detected]
+
+## Tech Stack
+[Languages, frameworks, libraries]
+
+## Rules Extracted (from project files)
+[Copy ALL rules found in project - naming, formatting, testing, security]
+
+## AI Agent Configuration
+[If AI agent config files found, list them here:]
+- Agent detected: [Claude/Cursor/Windsurf/Copilot/Other]
+- Config files found: [CLAUDE.md, .cursorrules, .windsurfrules, AGENTS.md, etc.]
+- Agent-specific rules: [Copy relevant rules from these files]
+
+## Existing Patterns
+[Code patterns found in src/]
+{{/isNewProject}}
+
+{{#isNewProject}}
+## Project Type
+Greenfield - New project
+
+## Architecture
+{{architecture}}
+
+## Tech Stack
+{{techStack}}
+
+## Additional Information
+{{initialStructure}}
+
+## Recommended Practices
+[Research and document best practices for this tech stack]
+[Suggest initial project structure]
+[Document any architectural decisions]
+{{/isNewProject}}
+[Code patterns found in src/]
+```
+
+**Instructions for this step:**
+1. Read actual project files (don't assume)
+2. Extract ALL rules found
+3. Document what you found
+4. Copy rules directly (not referenced)
+5. If rules conflict (e.g., AI config says X but project docs say Y) → LIST CONFLICTS and ask user which to follow
+6. If user wants → update the conflicting rule file to fix inconsistency
+7. **Detect AI agent configuration files and ASK:**
+   - "What AI agent are you using? (Claude, Cursor, Windsurf, Copilot, etc.)"
+   - "If you have agent-specific config files (CLAUDE.md, .cursorrules, etc.), what rules should I follow?"
+   - Copy ALL relevant agent-specific rules into context.md
+
+**Checklist:**
+- [ ] 1. Project scanned
+- [ ] 2. AI config files read
+- [ ] 3. AI agent identified and rules extracted (CLAUDE.md, .cursorrules, .windsurfrules, AGENTS.md, etc.)
+- [ ] 4. All rules extracted
+- [ ] 5. Conflicts identified (if any)
+- [ ] 6. User approved which rules to follow
+- [ ] 7. context.md created
+
+✅ All OK! → **WAIT for user approval.**
+
+---
+
+## STEP 5: GENERATE PLAN
+Create the implementation plan with rules copied into each step.
+
+{{#isNewProject}}
+⚠️ IMPORTANT: This is a NEW project. The first step MUST be creating the base project structure before implementing the feature.
+{{/isNewProject}}
+
+**BEFORE asking questions:**
+
+1. **Re-read the project with DEPTH** - Look at:
+   - Code patterns in existing files
+   - Similar features already implemented
+   - Tests, configs, docs
+   - How other features are structured
+   
+2. **If you find answers by reading → USE THEM** - Don't ask questions that can be answered by exploring the project
+
+3. **For each planned step, ask:**
+   - Does this functionality already exist? Can I reuse existing code?
+   - Does this comply with the referenced architecture ({{architecture}})?
+
+---
+
+❓ **After reviewing, do you still have questions?**
+- If something is still unclear, ASK NOW
+- If you need info not in the project, ASK NOW
+- Write your questions here →
+
+---
+
+**Action**: Create plan.md at `{{project}}/{{specsFolder}}/{{featureName}}/plan.md`
+
+**Output** (this is what you must write to the file):
+```
+# Plan - {{featureName}}
+
+See context.md for complete information.
+
+## Implementation Steps
+
+{{#isNewProject}}
+### Step 1: Create base project structure
+- Description: Set up initial project structure based on tech stack ({{techStack}})
+- Rules: Follow best practices for {{architecture}} architecture
+- Context: Reference context.md for recommended structure
+- Include: package.json/go.mod, basic folders, .gitignore, initial configs
+- Acceptance: Project compiles/runs basic command
+- Dependencies: None
+
+{{/isNewProject}}
+### {{#isNewProject}}2{{/isNewProject}}{{^isNewProject}}1{{/isNewProject}}: [Name]
+- Description: [what this step does]
+- Rules (from prompt-init.md): [COPY rules HERE - not at top]
+- Context: [reference context.md if needed]
+- Checks: REUSE, ARCHITECTURE ({{architecture}}), PERFORMANCE, {{#isNewProject}}GREENFIELD{{/isNewProject}}{{^isNewProject}}BROWNFIELD{{/isNewProject}}, CONSISTENCY, SECURITY
+- Acceptance: [measurable result]
+- Dependencies: [what must be done first]
+
+### Step {{#isNewProject}}3{{/isNewProject}}{{^isNewProject}}2{{/isNewProject}}: [Name]
+... (same structure)
+```
+
+**Instructions for this step:**
+1. Rules must be copied INTO each step (NOT at the top)
+2. Reference context.md for additional info
+3. If new info found → update context.md first
+4. Each step must have all fields filled
+{{#isNewProject}}
+5. FIRST step must create base project structure
+6. SECOND step onwards implement the feature{{/isNewProject}}
+
+⚠️ IMPORTANT:
+- ❌ WRONG: "Follow rules in prompt-init.md"
+- ✅ CORRECT: Copy actual rule: "MUST use camelCase for functions"
+
+**Checklist:**
+- [ ] 1. Doubts clarified by re-reading project
+- [ ] 2. New info added to context.md
+- [ ] 3. context.md referenced
+- [ ] 4. Rules copied INTO each step
+- [ ] 5. REUSE considered for each step - "Does this already exist? Can I reuse?"
+- [ ] 6. ARCHITECTURE compliance verified for each step - "Does this comply with {{architecture}}?"
+- [ ] 7. plan.md created
+
+✅ All OK! → **Show summary and WAIT for user approval.**
+
+---
+
+## STEP 6: IMPLEMENT
+Implement the plan step by step with validation.
+
+**Action**: Ask user preference first
+
+Question: "Do you want to validate each development stage?"
+- YES: After each step, ask for validation
+- NO: Implement all, then final validation
+
+---
+
+### Step 6A: WRITE CODE
+**For each step in plan.md:**
+1. Read prompt-init.md, context.md for this step
+2. Copy rules INTO your implementation (MANDATORY - write them in code comments)
+3. Write code
+4. **CRITICAL: Replace all magic strings and magic numbers with named constants**
+   - Search for hardcoded strings (error messages, URLs, keys, etc.)
+   - Search for hardcoded numbers (timeouts, limits, sizes, etc.)
+   - **FIRST: Check if a constant already exists that you can reuse**
+   - If no existing constant, create a new one with descriptive name
+5. Log what was done in plan.md
+
+**Checklist for Step 6A:**
+- [ ] 1. Read prompt-init.md for this step
+- [ ] 2. Rules copied into code (as comments, not referenced)
+- [ ] 3. Code written
+- [ ] 4. **Magic strings/numbers replaced with named constants**
+- [ ] 5. Logged in plan.md
+
+---
+
+### Step 6B: VALIDATE
+**For each step in plan.md:**
+1. **Verify NO magic strings or magic numbers remain in code**
+2. Run ALL available review tools in this project (linters, formatters, type checkers, security scanners, static analyzers, etc.)
+3. IF all review tools pass → Run tests
+4. Verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
+
+**Evidence required (show output before marking done):**
+- [ ] Run available review tools in this project (lint, test, typecheck, security, etc.)
+- [ ] Show actual output of each tool that exists
+- [ ] If tool doesn't exist → state "X not configured" and skip
+- [ ] DO NOT invent tools that don't exist
+
+**Checklist for Step 6B:**
+- [ ] 1. **No magic strings/numbers in code - all replaced with named constants**
+- [ ] 2. All review tools passed (list which tools ran)
+- [ ] 3. Tests written
+- [ ] 4. Tests passed
+- [ ] 5. REUSE checked - "Does this already exist? Can I reuse existing code?"
+- [ ] 6. ARCHITECTURE checked - "Does this comply with {{architecture}}?"
+- [ ] 7. PERFORMANCE checked
+- [ ] 8. BROWNFIELD checked
+- [ ] 9. CONSISTENCY checked
+- [ ] 10. SECURITY checked
+
+⚠️ IMPORTANT: You must complete Step 6A before Step 6B. Both steps require user validation.
+
+**WAIT for approval between steps (if user chose YES)**
+
+---
+
+## STEP 7: FINALIZE
+Complete the project with QA and PR.
+
+**Action**:
+1. Run full QA (tests, linters, type checks, security scan, static analysis)
+2. Scan {{docsFolder}}/ directory and ALL .md files in project to understand what documentation exists, then generate relevant docs
+3. If the feature adds/modifies an API → generate or update API specification (Swagger/OpenAPI, GraphQL schema, ProtoBuf, etc.)
+4. If the feature affects external integrations → document them
+5. Create PR
+
+{{#isNewProject}}
+---
+
+## STEP 7B: SETUP NEW PROJECT (Greenfield)
+Since this is a NEW project, create the initial setup for future development.
+
+**Action**:
+1. Create AI agent configuration file (choose one or more based on the tech stack):
+   - AGENTS.md (for AI agents)
+   - CLAUDE.md (for Claude)
+   - .cursorrules (for Cursor)
+   - .windsurfrules (for Windsurf)
+   - CONVENTIONS.md (project conventions)
+
+2. Create initial documentation:
+   - README.md (project overview, tech stack, how to run)
+   - CONTRIBUTING.md (how to contribute)
+   - .gitignore (appropriate for the tech stack)
+   - Any other essential project files
+
+3. Initialize git repository if not already done
+
+**Output** (create these files):
+```
+# AGENTS.md
+
+## Project Overview
+- Name: {{project}}
+- Tech Stack: {{techStack}}
+- Architecture: {{architecture}}
+
+## Development Rules
+[Rules for AI agents working on this project]
+
+## Commands
+[How to run tests, build, etc.]
+```
+
+```
+# README.md
+
+# {{project}}
+
+## Tech Stack
+{{techStack}}
+
+## Getting Started
+[How to set up and run the project]
+
+## Architecture
+{{architecture}}
+```
+{{/isNewProject}}
+
+**Instructions for this step:**
+1. All steps must show [x] completed in plan.md
+2. Tests must pass (aim for 100% coverage or project standard)
+3. Linters/type checkers must be clean
+4. Docs must be generated based on what's needed
+5. If API changed → integrate API documentation
+6. If no existing docs folder → ask user where to create documentation
+{{#isNewProject}}
+7. Create AI agent configuration files
+8. Create initial project documentation{{/isNewProject}}
+
+**Final checklist:**
+- [ ] 1. All plan steps completed [x]
+- [ ] 2. Tests passing
+- [ ] 3. Linters/type checkers clean
+- [ ] 4. Security scan passed
+- [ ] 5. API docs updated if needed
+- [ ] 6. Docs generated
+{{#isNewProject}}
+- [ ] 7. AI agent config created (AGENTS.md, CLAUDE.md, etc.)
+- [ ] 8. Project documentation created (README.md, CONTRIBUTING.md){{/isNewProject}}
+- [ ] {{#isNewProject}}9{{/isNewProject}}{{^isNewProject}}7{{/isNewProject}}. PR created
+
+✅ All OK! → **WAIT for user approval for merge.**
+
+---
+
+## SUPPORT SECTIONS (Reference)
+
+### OUTPUT FORMAT
 - Numbered lists (1., 2., 3.)
-- Checkboxes for completion ([ ] not started, [x] completed)
-- Headers for each section (### Step N, ## Phase X)
-- Blank lines between sections
+- Checkboxes ([ ] not started, [x] completed)
+- Headers (### Step N)
 
-## FEEDBACK LOOP (CRITICAL)
+### FEEDBACK LOOP
+- User says "no/wrong" → STOP, ask what's wrong, fix
+- User approves → continue
+- User wants to go back → go back and fix
 
-IF USER SAYS:
-- "no", "wrong", "not what I want", "not correct", "change"
-→ STOP immediately
-→ Ask: "What specifically is wrong? What should be different?"
-→ Refine, do NOT continue
-→ Show updated version before proceeding
+### TOKEN SAVING
+Report: failures, summary, blockers, questions
+Don't report: successful completions in detail
 
-IF USER APPROVES:
-→ Continue to next step
-
-IF USER ASKS TO GO BACK:
-→ Go back, make changes, re-present for approval
-
-## TOKEN SAVING (OPTIMIZE)
-
-Only report:
-- Failures and errors
-- Summary of completed steps
-- Blockers and issues
-- Questions requiring user input
-
-DO NOT report:
-- Successful completions in detail
-- Successful linter/test runs (unless failed)
-- Already known information
-
-## IMPLEMENTATION LOG
-
-After each step, briefly document:
-- What was implemented
-- Decisions made
-- Issues found
-- Files created/modified
-
-This creates a log for future reference and helps track progress.
-
-## CONTEXT
-
-Project: {{project}}
-Feature: {{featureName}} (Feature #{N})
-Type: {{type}}
-Branch: {{type}}/{{featureName}}
-Target: {{targetBranch}}
-
-{{#architecture}}Architecture: {{architecture}}
-{{#architectureDetails}}{{architectureDetails}}{{/architectureDetails}}
-{{/architecture}}
-
-{{#jiraTicket}}Ticket: {{jiraTicket}}{{/jiraTicket}}
-{{#prName}}PR: {{prName}}{{/prName}}
-{{#isDraft}}Status: Draft (requires explicit approval){{/isDraft}}
-{{#tags}}Labels: {{tags}}{{/tags}}
-
-## USER'S VISION
-
-What: {{functionalDesc}}
-{{#technicalDesc}}Technical: {{technicalDesc}}{{/technicalDesc}}
-
-Read and understand this vision before planning.
-
-## PHASE 1: DISCOVERY
-
-**Step 1: Scan AI Config Files**
-Read ALL AI agent config files. ANY file with rules/conventions/guidelines should be scanned:
-- Root: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `CONVENTIONS.md`, `BLACKBOX.md`, `GOO.md`, `.lncd.md`
-- Directories: `.cursor/rules/`, `.github/`, `.claude/`, `.windsurf/`, `.junie/`, `.aider.conf.yml`
-- Patterns: `*.md` files containing: rules, conventions, guidelines, guidelines, standards, patterns
-
-CRITICAL: Scan ALL `*.md` files in the project root and subdirectories. Any file that contains project rules, conventions, or guidelines MUST be read and processed.
-
-**Step 2: Scan Project Docs**
-Read: `*.md`, `docs/`, `ARCHITECTURE.md`, `ADR*.md`
-Keywords: rules, conventions, guidelines, architecture, patterns, standards
-
-**Step 3: Extract Rules**
-Search for: `## Rules`, `## Conventions`, `## Guidelines`, `- DO:`, `- DON'T:`, `- Always:`, `- Never:`
-Categorize: naming, formatting, architecture, testing, git, security, DO/DON'T
-
-If rules found: "I found [N] rules. Document in AGENTS.md for consistency?"
-
-**Step 4: Detect Conflicts**
-Compare rules. Count frequency. Note sources.
-
-{{#hasConflicts}}
-## ⚠️ CONFLICTS DETECTED
-
-For each conflict, present:
-```
-CONFLICT: [TYPE]
-
-1. [rule] - Referenced Nx in [file]
-2. [rule] - Referenced Nx in [file]
-N. Other (specify)
-
-Which rule? [1/N]
-```
-
-After selection:
-1. Use rule from [FILE-A] (remove from [FILE-B])
-2. Use rule from [FILE-B] (remove from [FILE-A])
-3. Keep both
-4. Other (user specifies)
-
-If normalize chosen → add Step 0 task.
-Document decision in AGENTS.md?
-{{/hasConflicts}}
-
-{{^hasArchitecture}}
-## ⚠️ ARCHITECTURE NOT DETECTED
-
-What architecture?
-1. Hexagonal  2. Layered  3. Clean  4. MVC  5. Event-Driven  6. Microservices  7. Modular Monolith  8. Other
-
-Document in AGENTS.md?
-{{/hasArchitecture}}
-
-## PHASE 2: PLANNING
-
-5. **Feature Numbering**: Check `{{specsFolder}}/`. Pattern: `{N}-{name}`. If exists, increment.
-
-{{#normalizeSteps}}
-6. **Step 0: Normalize Conventions**
-{{normalizeSteps}}
-{{/normalizeSteps}}
-
-7. Create folders: `{{specsFolder}}/{SPEC-NAME}/`, `{{docsFolder}}/`
-8. Add to `.gitignore`: `{{specsFolder}}/`, `.env`
-9. {{#createWorktree}}Create worktree: `git worktree add ...`{{/createWorktree}}{{^createWorktree}}Create branch: `git checkout -b {{type}}/{{featureName}}`{{/createWorktree}}
-
-10. **Generate context.md** with:
-    - User's Vision (refined)
-    - AI Config Files Detected + Rules extracted
-    - Conflicts Resolved
-    - Architecture + Tech Stack + Patterns
-    - Project Conventions (naming, formatting, testing, security)
-    - Current Status + Technical Debt + Constraints
-    - Decisions Made
-    - Step-by-Step Mode: [pause before each / proceed]
-    - Plan Summary (one-line of each step)
-
-11. **Generate plan.md**:
-
-    Structure by Functionality + Complexity (simplest first).
-    
-    **CRITICAL: Each step MUST follow this exact format.
-    DO NOT skip any section. DO NOT use placeholders. FILL EVERYTHING.**
-
-    ```
-    ### Step N: [Name]
-    [ ] not started  [x] completed
-    
-    Description: [What this step does. Be specific.]
-    
-    RULES FOR THIS STEP (MANDATORY - copy ALL relevant rules directly):
-    - MUST: [Copy rule from config files - e.g., Naming: camelCase for functions]
-    - MUST: [Copy rule from config files - e.g., Indentation: 2 spaces]
-    - MUST: [Copy rule from config files - e.g., Error handling: use Either pattern]
-    DO NOT write "see AGENTS.md" - COPY THE ACTUAL RULE HERE.
-    
-    MANDATORY CHECKS (verify ALL before coding):
-    - REUSE: Search existing code [methods/DTOs/services]. NO duplication.
-    - PERFORMANCE: Is solution performant? Any N+1 queries?
-    - BROWNFIELD: If modifying existing code, what uses it? Impact?
-    - CONSISTENCY: Does it follow project patterns?
-    - SECURITY: Input validation? Auth? Output sanitization?
-    
-    ARCHITECTURE REMINDER (MANDATORY):
-    - MUST: Respect {{architecture}} architecture
-    - MUST: [Copy specific architecture rules - e.g., keep domain/application/infrastructure separation]
-    
-    Acceptance Criteria: [What defines success. Be measurable.]
-    Dependencies: [What must be done first.]
-    ```
-
-12. **Show plan with numbered steps.**
-
-    "Does this match your vision?
-    - Step 1: [summary] ✓?
-    - Step 2: [summary] ✓?
-    - ..."
-    
-    Refine until user approves.
-
-    "Pause before each step for validation?
-    [Yes / No]"
-
-## PHASE 3: IMPLEMENTATION
-
-13. Implement by functional units, simplest first
-14. Write tests alongside code
-15. Run linters, fix issues
-
-After each step, log:
-```
-## Step N Log
-- Implemented: [what]
-- Decisions: [why]
-- Issues: [if any]
-- Files: [created/modified]
-```
-
-16. Commit incrementally
-
-## PHASE 4: QA
-
-17. Run: linters, static analyzers, type checkers, security scanners
-18. Run tests (aim 100% coverage)
-19. Cleanup: remove debug code, unused imports, magic numbers
-20. Update docs and comments
-
-Post-Development: "Check existing tests to update?"
-
-## PHASE 5: DELIVERY
-
-21. Review plan, verify all tasks done
-22. {{#docsFolder}}Generate docs in `{{docsFolder}}/`: architecture.md, api-externals.md, data-models.md, dependencies.md{{/docsFolder}}
-23. Pre-PR checklist:
-    - Pending tasks?
-    - Missing tests/docs?
-    - Security issues?
-    Wait for user approval.
-24. Create PR: Title `{{prName}}{{^prName}}{{type}}/{{featureName}}{{/prName}}`, Labels `{{tags}}`, Draft `{{isDraft}}yes{{/isDraft}}{{^isDraft}}no{{/isDraft}}`
-25. {{#jiraTicket}}Link PR to {{jiraTicket}}{{/jiraTicket}}
-26. Save prompt to `{{specsFolder}}/{SPEC-NAME}/initial-prompt.md`
+### SECURITY
+- NEVER hardcode secrets → CRITICAL ERROR, ask user
+- Verify: input validation, SQL/XSS, auth
 
 ## REFERENCE
-
-**What it does:** {{functionalDesc}}
-{{#technicalDesc}}**Technical:** {{technicalDesc}}{{/technicalDesc}}
-
-After reading docs, refine and present this vision.
-
-## PRINCIPLES (APPLY ALWAYS)
-
-- SOLID, YAGNI, DRY, KISS
-- Descriptive names, reuse code
-- Only log on errors
-- Resilience: retry, timeouts, circuit breaker
-
-## SECURITY (VERIFY)
-
-NEVER hardcode secrets. If found → CRITICAL ERROR, ask user.
-
-Verify: input validation, SQL/XSS prevention, auth, rate limiting.
+**What to build**: {{functionalDesc}}
+{{#technicalDesc}}**Technical**: {{technicalDesc}}{{/technicalDesc}}
 </script>
 
 <script nonce="{{nonce}}">
-  let currentType = 'feature';
-  let currentArchitecture = null;
-
   const baseTags = [
     { id:'bug', cls:'r' },
     { id:'documentation', cls:'g' },
@@ -913,51 +1300,24 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
 
   const vscode = acquireVsCodeApi();
 
-  function pickDir(targetId) {
+function pickDir(targetId) {
     vscode.postMessage({ type: 'pickFolder', targetId });
-  }
-
-  function setType(t) {
-    currentType = t;
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('on', b.dataset.type === t));
-    renderTags(); updatePreview();
-  }
-
-  function setArchitecture(arch) {
-    currentArchitecture = arch;
-    document.querySelectorAll('.arch-btn').forEach(b => b.classList.toggle('on', b.dataset.arch === arch));
-    saveState();
-  }
-
-  function sanitize(el) {
-    el.value = el.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
   }
 
   function updatePreview() {
     const manual = document.getElementById('prName').value.trim();
     const feat   = document.getElementById('featureName').value.trim();
+    const type   = document.getElementById('branchType').value.trim() || 'feature';
     const el     = document.getElementById('prPreview');
     if (manual)    el.innerHTML = `<span>→</span> <code>${manual}</code>`;
-    else if (feat) el.innerHTML = `<span>→</span> <code>${currentType}/${feat}</code> <span class="badge-auto">auto</span>`;
+    else if (feat) el.innerHTML = `<span>→</span> <code>${type}/${feat}</code> <span class="badge-auto">auto</span>`;
     else           el.innerHTML = `<span style="color:var(--dim)">AI will generate the name</span>`;
-  }
-
-  function updateArchitectureStatus() {
-    const el = document.getElementById('aiConfigStatus');
-    if (currentArchitecture) {
-      el.innerHTML = `<span class="detected">✓ Architecture: ${currentArchitecture}</span>`;
-    } else {
-      el.innerHTML = `<span class="detected-none">⚠ Not detected - please select</span>`;
-    }
   }
 
   function renderTags() {
     const w = document.getElementById('tagsWrap');
     w.innerHTML = '';
-    const isDraft = document.getElementById('isDraft')?.checked;
-    const defaultTag = typeDefaultTag[currentType];
-    baseTags.forEach(t => w.appendChild(mkTag(t, t.id === defaultTag)));
-    draftTags.forEach(t => w.appendChild(mkTag(t, t.id==='draft'&&isDraft)));
+    baseTags.forEach(t => w.appendChild(mkTag(t, false)));
   }
 
   function mkTag(cfg, checked) {
@@ -1006,7 +1366,7 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     const proj = document.getElementById('project').value.trim();
     const feat = document.getElementById('featureName').value.trim();
     const br   = document.getElementById('targetBranch').value.trim();
-    const jira = document.getElementById('jiraTicket').value.trim();
+    const issueTracker = document.getElementById('jiraTicket').value.trim();
     const prM  = document.getElementById('prName').value.trim();
     const fD   = document.getElementById('functionalDesc').value.trim();
     const tD   = document.getElementById('technicalDesc').value.trim();
@@ -1017,16 +1377,23 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
       .filter(Boolean))];
     const dr   = document.getElementById('isDraft').checked;
     const cw   = document.getElementById('createWorktree').checked;
+    const isNewProject = document.getElementById('isNewProject').checked;
     const tags = getTags();
-    const arch = currentArchitecture || document.getElementById('customArchitecture').value.trim() || null;
+    const archSelect = document.getElementById('architectureSelect').value;
+    const customArch = document.getElementById('customArchitecture').value.trim();
+    const arch = archSelect === 'other' ? customArch : (archSelect || null);
     const archDetails = tD || null;
+    const scanScope = document.getElementById('scanScope').value;
+    const techStack = document.getElementById('techStack')?.value.trim() || null;
+    const initialStructure = document.getElementById('initialStructure')?.value.trim() || null;
 
     const data = {
       project: proj,
+      isNewProject: isNewProject,
       featureName: feat,
-      type: currentType,
+      type: document.getElementById('branchType').value.trim() || 'feature',
       targetBranch: br,
-      jiraTicket: jira || null,
+      issueTracker: issueTracker || null,
       prName: prM || null,
       functionalDesc: fD,
       technicalDesc: tD || null,
@@ -1039,10 +1406,13 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
       architecture: arch,
       architectureDetails: archDetails,
       hasArchitecture: !!arch,
+      techStack: techStack,
+      initialStructure: initialStructure,
       hasConflicts: false,
       conflicts: '',
       normalizeSteps: '',
       rules: '',
+      scanScope: scanScope,
       __blocks: {}
     };
 
@@ -1056,6 +1426,10 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     result = result.replace(/\{\{\^([a-zA-Z0-9]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, key, block) => {
       return !data[key] ? block : '';
     });
+
+    result = result.replace(/\{\{#ifEquals\s+([a-zA-Z0-9]+)\s+"([^"]+)"\}\}([\s\S]*?)\{\{\/ifEquals\}\}/g, (match, key, value, block) => {
+      return data[key] === value ? block : '';
+    });
     
     result = result.replace(/\{\{([a-zA-Z0-9.]+)\}\}/g, (match, key) => {
       const value = key.split('.').reduce((obj, k) => obj?.[k], data);
@@ -1068,6 +1442,9 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     document.getElementById('jsonPh').style.display = 'none';
     document.getElementById('btnCopy').style.display = 'flex';
     saveState();
+
+    // Auto-copy to clipboard
+    copyJSON();
   }
 
   function copyJSON() {
@@ -1092,7 +1469,7 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
   }
 
   function resetForm() {
-    ['project','specsFolder','docsFolder','featureName','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc'].forEach(id => {
+    ['project','specsFolder','docsFolder','featureName','issueTracker','prName','referencePaths','functionalDesc','technicalDesc'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('targetBranch').value = 'develop';
@@ -1100,12 +1477,11 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     document.getElementById('createWorktree').checked = false;
     document.querySelectorAll('.err').forEach(e => e.classList.remove('err'));
     document.querySelectorAll('.ferr').forEach(e => e.classList.remove('on'));
-    setType('feature');
-    currentArchitecture = null;
-    document.querySelectorAll('.arch-btn').forEach(b => b.classList.remove('on'));
+    document.getElementById('branchType').value = '';
+    document.getElementById('architectureSelect').value = '';
     document.getElementById('customArchitecture').value = '';
-    updateArchitectureStatus();
-    document.getElementById('jsonOut').style.display = 'none';
+    document.getElementById('customArchitecture').style.display = 'none';
+        document.getElementById('jsonOut').style.display = 'none';
     document.getElementById('jsonPh').style.display = 'block';
     document.getElementById('btnCopy').style.display = 'none';
     saveState();
@@ -1118,16 +1494,20 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
       docsFolder: document.getElementById('docsFolder')?.value ?? '',
       featureName: document.getElementById('featureName')?.value ?? '',
       targetBranch: document.getElementById('targetBranch')?.value ?? 'develop',
-      jiraTicket: document.getElementById('jiraTicket')?.value ?? '',
+      issueTracker: document.getElementById('jiraTicket')?.value ?? '',
       prName: document.getElementById('prName')?.value ?? '',
       isDraft: !!document.getElementById('isDraft')?.checked,
       createWorktree: !!document.getElementById('createWorktree')?.checked,
+      isNewProject: !!document.getElementById('isNewProject')?.checked,
       referencePaths: document.getElementById('referencePaths')?.value ?? '',
+      scanScope: document.getElementById('scanScope')?.value ?? 'relevant',
       functionalDesc: document.getElementById('functionalDesc')?.value ?? '',
       technicalDesc: document.getElementById('technicalDesc')?.value ?? '',
-      currentType,
-      currentArchitecture,
+      branchType: document.getElementById('branchType')?.value ?? '',
+      architectureSelect: document.getElementById('architectureSelect')?.value ?? '',
       customArchitecture: document.getElementById('customArchitecture')?.value ?? '',
+      techStack: document.getElementById('techStack')?.value ?? '',
+      initialStructure: document.getElementById('initialStructure')?.value ?? '',
       tags: getTags(),
       output: document.getElementById('jsonOut')?.textContent ?? '',
       outputVisible: document.getElementById('jsonOut')?.style.display !== 'none',
@@ -1142,27 +1522,28 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     setVal('docsFolder', state.docsFolder);
     setVal('featureName', state.featureName);
     setVal('targetBranch', state.targetBranch || 'develop');
-    setVal('jiraTicket', state.jiraTicket);
+    setVal('issueTracker', state.issueTracker);
     setVal('prName', state.prName);
     setVal('referencePaths', state.referencePaths);
+    setVal('scanScope', state.scanScope || 'relevant');
     setVal('functionalDesc', state.functionalDesc);
     setVal('technicalDesc', state.technicalDesc);
     setVal('customArchitecture', state.customArchitecture);
+    setVal('techStack', state.techStack);
+    setVal('initialStructure', state.initialStructure);
+    setVal('architectureSelect', state.architectureSelect);
 
     document.getElementById('isDraft').checked = !!state.isDraft;
     document.getElementById('createWorktree').checked = !!state.createWorktree;
-
-    setType(state.currentType || 'feature');
-
-    if (state.currentArchitecture) {
-      setArchitecture(state.currentArchitecture);
-    }
+    document.getElementById('isNewProject').checked = !!state.isNewProject;
+    document.getElementById('newProjectExtras').style.display = state.isNewProject ? 'block' : 'none';
+    document.getElementById('customArchitecture').style.display = state.architectureSelect === 'other' ? 'block' : 'none';
+    document.getElementById('branchType').value = state.branchType || '';
 
     renderTags();
     updateDraftTags();
     updatePreview();
-    updateArchitectureStatus();
-
+    
     if (Array.isArray(state.tags)) {
       state.tags.forEach((t) => {
         const cb = document.getElementById(`tag-${t}`);
@@ -1187,7 +1568,7 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
   }
 
   function bindStatePersistence() {
-    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','jiraTicket','prName','referencePaths','functionalDesc','technicalDesc','customArchitecture'];
+    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','branchType','issueTracker','prName','referencePaths','scanScope','functionalDesc','technicalDesc','customArchitecture','techStack','initialStructure','architectureSelect'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1196,6 +1577,8 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     });
     document.getElementById('isDraft')?.addEventListener('change', saveState);
     document.getElementById('createWorktree')?.addEventListener('change', saveState);
+    document.getElementById('isNewProject')?.addEventListener('change', saveState);
+    document.getElementById('architectureSelect')?.addEventListener('change', () => { saveState(); });
 
     document.getElementById('tagsWrap')?.addEventListener('change', saveState);
   }
@@ -1204,15 +1587,24 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
     document.getElementById('btnCopy')?.addEventListener('click', copyJSON);
     document.getElementById('btnClear')?.addEventListener('click', resetForm);
     document.getElementById('btnBrowse')?.addEventListener('click', () => pickDir('project'));
-    document.getElementById('btnTypeFeature')?.addEventListener('click', () => setType('feature'));
-    document.getElementById('btnTypeFix')?.addEventListener('click', () => setType('fix'));
-    document.getElementById('btnTypeMigration')?.addEventListener('click', () => setType('migration'));
-    document.getElementById('btnArchHex')?.addEventListener('click', () => { setArchitecture('Hexagonal'); updateArchitectureStatus(); });
-    document.getElementById('btnArchLayered')?.addEventListener('click', () => { setArchitecture('Layered'); updateArchitectureStatus(); });
-    document.getElementById('btnArchClean')?.addEventListener('click', () => { setArchitecture('Clean'); updateArchitectureStatus(); });
-    document.getElementById('btnArchMvc')?.addEventListener('click', () => { setArchitecture('MVC'); updateArchitectureStatus(); });
-    document.getElementById('btnArchMono')?.addEventListener('click', () => { setArchitecture('Modular Monolith'); updateArchitectureStatus(); });
     document.getElementById('btnGenerate')?.addEventListener('click', generatePrompt);
+    document.getElementById('isNewProject')?.addEventListener('change', (e) => {
+      const isNew = e.target.checked;
+      document.getElementById('newProjectExtras').style.display = isNew ? 'block' : 'none';
+      saveState();
+    });
+    document.getElementById('architectureSelect')?.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const customInput = document.getElementById('customArchitecture');
+      if (value === 'other') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
+      saveState();
+    });
   }
 
   function bindFormInputs() {
@@ -1220,11 +1612,10 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
       sanitize(e.target); updatePreview();
     });
     document.getElementById('prName')?.addEventListener('input', updatePreview);
+    document.getElementById('branchType')?.addEventListener('input', updatePreview);
     document.getElementById('isDraft')?.addEventListener('change', updateDraftTags);
     document.getElementById('customArchitecture')?.addEventListener('input', () => {
-      currentArchitecture = document.getElementById('customArchitecture').value.trim() || null;
-      updateArchitectureStatus();
-      saveState();
+            saveState();
     });
   }
 
@@ -1257,8 +1648,7 @@ Verify: input validation, SQL/XSS prevention, auth, rate limiting.
 
   renderTags();
   updatePreview();
-  updateArchitectureStatus();
-
+  
   bindButtons();
   bindFormInputs();
   bindStatePersistence();
