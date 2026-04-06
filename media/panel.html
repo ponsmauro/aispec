@@ -36,7 +36,7 @@
       flex-direction: column;
     }
 
-    .vsc-titlebar {
+    .vsc-data-tooltipbar {
       height: 30px;
       background: #323233;
       display: flex; align-items: center;
@@ -46,7 +46,7 @@
     .vsc-dot.red    { background: #ff5f57; }
     .vsc-dot.yellow { background: #ffbd2e; }
     .vsc-dot.green  { background: #28c840; }
-    .vsc-title { flex: 1; text-align: center; font-size: 11px; color: #aaa; letter-spacing: .2px; }
+    .vsc-data-tooltip { flex: 1; text-align: center; font-size: 11px; color: #aaa; letter-spacing: .2px; }
 
     .vsc-body { flex: 1; display: flex; overflow: hidden; }
 
@@ -69,7 +69,7 @@
       border-right: 1px solid #1e1e1e;
       display: flex; flex-direction: column; overflow: hidden;
     }
-    .vsc-panel-title {
+    .vsc-panel-data-tooltip {
       height: 35px;
       display: flex; align-items: center;
       padding: 0 12px;
@@ -298,6 +298,65 @@
     .tag.on.y { background: rgba(206,145,120,.1); border-color: var(--warn); color: var(--warn); }
     .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
+    /* Tooltips */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+      z-index: 1000;
+      margin-bottom: 4px;
+    }
+    [data-tooltip]:hover::after { opacity: 1; }
+
+    /* Autocomplete */
+    .autocomplete-wrapper { position: relative; }
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--s2);
+      border: 1px solid var(--b);
+      border-top: none;
+      border-radius: 0 0 3px 3px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .autocomplete-list.show { display: block; }
+    .autocomplete-item {
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .autocomplete-item:hover, .autocomplete-item.active {
+      background: var(--acc2);
+      color: #fff;
+    }
+    .autocomplete-item .new-tag {
+      font-size: 9px;
+      background: var(--ok);
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
     hr.p-div { border: none; border-top: 1px solid var(--b); margin: 4px 8px 8px; }
 
     .ferr { font-size: 10px; color: var(--err); margin-top: 2px; display: none; }
@@ -348,7 +407,7 @@
       border-radius: 0;
       box-shadow: none;
     }
-    .vsc-titlebar,
+    .vsc-data-tooltipbar,
     .vsc-activity,
     .vsc-editor,
     .vsc-statusbar {
@@ -378,28 +437,28 @@
 <div class="vsc-window">
 
   <!-- Title bar -->
-  <div class="vsc-titlebar">
+  <div class="vsc-data-tooltipbar">
     <span class="vsc-dot red"></span>
     <span class="vsc-dot yellow"></span>
     <span class="vsc-dot green"></span>
-    <span class="vsc-title">fury_mp-seller-activation — Visual Studio Code</span>
+    <span class="vsc-data-tooltip">fury_mp-seller-activation — Visual Studio Code</span>
   </div>
 
   <div class="vsc-body">
 
     <!-- Activity bar -->
     <div class="vsc-activity">
-      <div class="act-icon active" title="Explorer">
+      <div class="act-icon active" data-tooltip="Explorer">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 0H8.5L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.5l1.5-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zM14.57 22.5H2.5v-15H7v9.07L8.5 18h6.07v4.5zm5.93-6H8.5v-15H16V6.5L17.5 8h3v8.5z"/></svg>
       </div>
-      <div class="act-icon" title="Search">
+      <div class="act-icon" data-tooltip="Search">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 22.88l1.12 1.12 8.06-8.06A8.25 8.25 0 1 0 15.25 0zm0 15a6.75 6.75 0 1 1 0-13.5 6.75 6.75 0 0 1 0 13.5z"/></svg>
       </div>
-      <div class="act-icon" title="Source Control">
+      <div class="act-icon" data-tooltip="Source Control">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.007 8.222A3.738 3.738 0 0 0 15.045 5.2a3.737 3.737 0 0 0 1.156 6.583 2.988 2.988 0 0 1-2.668 1.67h-2.99a4.456 4.456 0 0 0-2.989 1.165V7.4a3.737 3.737 0 1 0-1.494 0v9.117a3.776 3.776 0 1 0 1.816.099 2.99 2.99 0 0 1 2.668-1.667h2.99a4.484 4.484 0 0 0 4.223-3.039 3.736 3.736 0 0 0 3.25-3.688zM4.565 3.738a2.242 2.242 0 1 1 4.484 0 2.242 2.242 0 0 1-4.484 0zm4.484 16.441a2.242 2.242 0 1 1-4.484 0 2.242 2.242 0 0 1 4.484 0zm8.221-9.715a2.242 2.242 0 1 1 0-4.485 2.242 2.242 0 0 1 0 4.485z"/></svg>
       </div>
       <div style="margin-top:auto;margin-bottom:8px">
-        <div class="act-icon" title="Settings">
+        <div class="act-icon" data-tooltip="Settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.67-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.33-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.66c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
         </div>
       </div>
@@ -412,20 +471,20 @@
 
           <!-- Project bar -->
           <div class="proj-bar">
-            <label title="Your project name (folder name)">Project</label>
+            <label data-tooltip="Your project name (folder name)">Project <span class="req">*</span></label>
             <div class="pick-row" style="flex:1;min-width:0">
-              <input class="p-input" type="text" id="project" placeholder="my-project" title="Project folder name" />
-              <button class="btn-pick" id="btnBrowse" title="Browse for project folder">
+              <input class="p-input" type="text" id="project" placeholder="my-project" data-tooltip="Project folder name" />
+              <button class="btn-pick" id="btnBrowse" data-tooltip="Browse for project folder">
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5L6.33 1.585A1.75 1.75 0 0 0 5.06 1H1.75z"/></svg>
               </button>
-              <button class="btn-pick" id="btnClear" title="Clear all form fields">
+              <button class="btn-pick" id="btnClear" data-tooltip="Clear all form fields">
                 Clear
               </button>
             </div>
           </div>
 
           <!-- New Project Toggle -->
-          <div class="draft-row" style="margin-bottom:8px" title="Enable for new projects (greenfield). Creates base structure first.">
+          <div class="draft-row" style="margin-bottom:8px" data-tooltip="Enable for new projects (greenfield). Creates base structure first.">
             <span class="draft-label">
               <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--ok)"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/></svg>
               Is a new project
@@ -458,13 +517,13 @@
             <div class="sec-label">Workspace</div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
               <div class="field">
-                <label title="Folder where specs will be stored">Specs folder <span class="req">*</span></label>
-                <input class="p-input" type="text" id="specsFolder" placeholder="specs" title="Folder for feature specifications" />
+                <label data-tooltip="Folder where specs will be stored">Specs folder <span class="req">*</span></label>
+                <input class="p-input" type="text" id="specsFolder" placeholder="specs" data-tooltip="Folder for feature specifications" />
                 <div class="ferr" id="e-specs">Required</div>
               </div>
               <div class="field">
-                <label title="Folder where documentation is stored">Docs folder</label>
-                <input class="p-input" type="text" id="docsFolder" placeholder="docs" title="Folder for documentation" />
+                <label data-tooltip="Folder where documentation is stored">Docs folder</label>
+                <input class="p-input" type="text" id="docsFolder" placeholder="docs" data-tooltip="Folder for documentation" />
               </div>
             </div>
           </div>
@@ -473,9 +532,9 @@
 
           <!-- Architecture -->
           <div class="p-section">
-            <div class="sec-label" title="Project architecture pattern">Architecture</div>
+            <div class="sec-label" data-tooltip="Project architecture pattern">Architecture</div>
             <div class="field">
-              <select class="p-input" id="architectureSelect" title="Select or auto-detect architecture">
+              <select class="p-input" id="architectureSelect" data-tooltip="Select or auto-detect architecture">
                 <option value="">To be discovered</option>
                 <option value="Hexagonal">Hexagonal</option>
                 <option value="Layered">Layered</option>
@@ -484,7 +543,7 @@
                 <option value="Modular Monolith">Modular Monolith</option>
                 <option value="other">Other</option>
               </select>
-              <input class="p-input" type="text" id="customArchitecture" placeholder="Specify architecture" style="margin-top:4px; display:none" title="Enter custom architecture name" />
+              <input class="p-input" type="text" id="customArchitecture" placeholder="Specify architecture" style="margin-top:4px; display:none" data-tooltip="Enter custom architecture name" />
             </div>
           </div>
 
@@ -494,13 +553,13 @@
           <div class="p-section">
             <div class="sec-label">Feature</div>
             <div class="field">
-              <label title="Feature name (kebab-case, no spaces)">Name <span class="req">*</span> <span class="hint">(use '-', no spaces)</span></label>
-              <input class="p-input" type="text" id="featureName" placeholder="add-payment-webhook" title="Feature name in kebab-case" />
+              <label data-tooltip="Feature name (kebab-case, no spaces)">Name <span class="req">*</span> <span class="hint">(use '-', no spaces)</span></label>
+              <input class="p-input" type="text" id="featureName" placeholder="add-payment-webhook" data-tooltip="Feature name in kebab-case" />
               <div class="ferr" id="e-feat">Letters, numbers and '-' only</div>
             </div>
             <div class="field">
-              <label title="Issue tracker ticket ID (optional)">Issue tracker ID <span class="hint">(e.g. PROJ-123)</span></label>
-              <input class="p-input" type="text" id="jiraTicket" placeholder="PROJ-123" title="Jira/issue tracker ticket ID" />
+              <label data-tooltip="Issue tracker ticket ID (optional)">Issue tracker ID <span class="hint">(e.g. PROJ-123)</span></label>
+              <input class="p-input" type="text" id="jiraTicket" placeholder="PROJ-123" data-tooltip="Jira/issue tracker ticket ID" />
             </div>
           </div>
 
@@ -518,12 +577,12 @@
               <div class="field" style="margin-bottom:0">
                 <label>Type <span class="req">*</span></label>
                 <input class="p-input" type="text" id="branchType" placeholder="feature, fix, chore..." />
+                <div class="ferr" id="e-branchType">Min 3 characters</div>
               </div>
             </div>
             <div class="field">
-              <label>Branch name <span class="hint">(override)</span></label>
-              <input class="p-input" type="text" id="prName" placeholder="Leave empty for auto-generation" />
-              <div class="pr-prev" id="prPreview"></div>
+              <label>Branch name</label>
+              <input class="p-input" type="text" id="branchName" placeholder="feature/feature-name" />
             </div>
             <div class="field">
               <div class="field">
@@ -717,10 +776,9 @@ Show basic data (WITHOUT functional/technical descriptions):
 4. Architecture: {{architecture}}
 5. Feature name: {{featureName}}
 6. Base branch: {{targetBranch}}
-7. Branch name: {{type}}/{{featureName}}
+7. Branch name: {{#branchName}}{{branchName}}{{/branchName}}{{^branchName}}{{type}}/{{featureName}}{{/branchName}}
 8. Branch type: {{type}}
 {{#createWorktree}}9. Create as git worktree: YES{{/createWorktree}}
-{{#prName}}10. Custom branch name: {{prName}}{{/prName}}
 {{#issueTracker}}11. Issue tracker: {{issueTracker}}{{/issueTracker}}
 12. Draft: {{isDraft}}
 13. Tags: {{tags}}
@@ -862,8 +920,7 @@ Create the setup file with all input data and rules.
 - Project type: {{#isNewProject}}Greenfield (new){{/isNewProject}}{{^isNewProject}}Brownfield (existing){{/isNewProject}}
 - Feature: {{featureName}}
 - Type: {{type}}
-{{#prName}}- Custom branch name: {{prName}}{{/prName}}
-{{^prName}}- Branch: {{type}}/{{featureName}}{{/prName}}
+- Branch: {{#branchName}}{{branchName}}{{/branchName}}{{^branchName}}{{type}}/{{featureName}}{{/branchName}}
 {{^isNewProject}}- Target: {{targetBranch}}
 - Base branch synced: YES (git fetch + git pull executed){{/isNewProject}}
 {{#createWorktree}}- Create as git worktree: YES{{/createWorktree}}
@@ -1133,14 +1190,19 @@ Question: "Do you want to validate each development stage?"
    - Search for hardcoded numbers (timeouts, limits, sizes, etc.)
    - **FIRST: Check if a constant already exists that you can reuse**
    - If no existing constant, create a new one with descriptive name
-5. Log what was done in plan.md
+5. Write tests that verify BEHAVIOR (not just coverage):
+   - Tests should fail if functionality changes incorrectly
+   - Focus on "what should happen" not "what should not happen"
+   - Each test should have a clear purpose tied to the feature requirements
+6. Log what was done in plan.md
 
 **Checklist for Step 6A:**
 - [ ] 1. Read prompt-init.md for this step
 - [ ] 2. Rules copied into code (as comments, not referenced)
 - [ ] 3. Code written
 - [ ] 4. **Magic strings/numbers replaced with named constants**
-- [ ] 5. Logged in plan.md
+- [ ] 5. Tests written that verify BEHAVIOR (not just coverage)
+- [ ] 6. Logged in plan.md
 
 ---
 
@@ -1151,6 +1213,16 @@ Question: "Do you want to validate each development stage?"
 3. IF all review tools pass → Run tests
 4. Verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
 
+**⚠️ IMPORTANT: Test Quality Over Coverage**
+- ❌ WRONG: Write tests just to increase coverage percentage
+- ✅ CORRECT: Write tests that FAIL if functionality changes incorrectly
+- Tests should verify BEHAVIOR, not just line coverage
+- If code changes and a test fails → This is GOOD! It means the test is catching the change
+- When a test fails due to intentional functionality change → STOP and ask user how to proceed:
+  - Update the test to match new expected behavior
+  - Keep the old behavior
+  - Discuss the change with the user
+
 **Evidence required (show output before marking done):**
 - [ ] Run available review tools in this project (lint, test, typecheck, security, etc.)
 - [ ] Show actual output of each tool that exists
@@ -1160,8 +1232,8 @@ Question: "Do you want to validate each development stage?"
 **Checklist for Step 6B:**
 - [ ] 1. **No magic strings/numbers in code - all replaced with named constants**
 - [ ] 2. All review tools passed (list which tools ran)
-- [ ] 3. Tests written
-- [ ] 4. Tests passed
+- [ ] 3. Tests written that verify BEHAVIOR (not just coverage)
+- [ ] 4. Tests passed (if tests fail due to functionality change → STOP and ask user)
 - [ ] 5. REUSE checked - "Does this already exist? Can I reuse existing code?"
 - [ ] 6. ARCHITECTURE checked - "Does this comply with {{architecture}}?"
 - [ ] 7. PERFORMANCE checked
@@ -1241,22 +1313,24 @@ Since this is a NEW project, create the initial setup for future development.
 
 **Instructions for this step:**
 1. All steps must show [x] completed in plan.md
-2. Tests must pass (aim for 100% coverage or project standard)
+2. Tests must pass (focus on FUNCTIONAL tests that verify behavior, not just coverage)
 3. Linters/type checkers must be clean
 4. Docs must be generated based on what's needed
 5. If API changed → integrate API documentation
 6. If no existing docs folder → ask user where to create documentation
+7. **IMPORTANT: If any tests fail due to intentional functionality changes → STOP and ask user how to proceed**
 {{#isNewProject}}
-7. Create AI agent configuration files
-8. Create initial project documentation{{/isNewProject}}
+8. Create AI agent configuration files
+9. Create initial project documentation{{/isNewProject}}
 
 **Final checklist:**
 - [ ] 1. All plan steps completed [x]
-- [ ] 2. Tests passing
-- [ ] 3. Linters/type checkers clean
-- [ ] 4. Security scan passed
-- [ ] 5. API docs updated if needed
-- [ ] 6. Docs generated
+- [ ] 2. Tests passing (functional tests that verify behavior, not just coverage)
+- [ ] 3. If any tests failed due to intentional functionality changes → User notified and decision made
+- [ ] 4. Linters/type checkers clean
+- [ ] 5. Security scan passed
+- [ ] 6. API docs updated if needed
+- [ ] 7. Docs generated
 {{#isNewProject}}
 - [ ] 7. AI agent config created (AGENTS.md, CLAUDE.md, etc.)
 - [ ] 8. Project documentation created (README.md, CONTRIBUTING.md){{/isNewProject}}
@@ -1306,6 +1380,16 @@ Don't report: successful completions in detail
     fix: 'fix',
     migration: 'enhancement',
   };
+
+  const autocompleteDefaults = {
+    branchType: ['feature', 'fix', 'chore', 'docs', 'refactor', 'test', 'hotfix'],
+    targetBranch: ['develop', 'main', 'master'],
+  };
+
+  let autocompleteHistory = {
+    branchType: [],
+    targetBranch: [],
+  };
   const draftTags = [
     { id:'draft', cls:'d' },
   ];
@@ -1317,19 +1401,109 @@ function pickDir(targetId) {
   }
 
   function updatePreview() {
-    const manual = document.getElementById('prName').value.trim();
-    const feat   = document.getElementById('featureName').value.trim();
-    const type   = document.getElementById('branchType').value.trim() || 'feature';
-    const el     = document.getElementById('prPreview');
-    if (manual)    el.innerHTML = `<span>→</span> <code>${manual}</code>`;
-    else if (feat) el.innerHTML = `<span>→</span> <code>${type}/${feat}</code> <span class="badge-auto">auto</span>`;
-    else           el.innerHTML = `<span style="color:var(--dim)">AI will generate the name</span>`;
+    const branchInput = document.getElementById('branchName');
+    const feat = document.getElementById('featureName').value.trim();
+    const type = document.getElementById('branchType').value.trim();
+    
+    if (feat && type) {
+      branchInput.value = `${type}/${feat}`;
+    }
   }
 
   function renderTags() {
     const w = document.getElementById('tagsWrap');
     w.innerHTML = '';
     baseTags.forEach(t => w.appendChild(mkTag(t, false)));
+  }
+
+  function initAutocomplete(inputId, type) {
+    const input = document.getElementById(inputId);
+    if (!input) {
+      console.log('Input not found:', inputId);
+      return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'autocomplete-wrapper';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const list = document.createElement('div');
+    list.className = 'autocomplete-list';
+    wrapper.appendChild(list);
+
+    input.addEventListener('input', function() {
+      const value = this.value.toLowerCase().trim();
+      const defaults = autocompleteDefaults[type] || [];
+      const history = autocompleteHistory[type] || [];
+      const allValues = [...new Set([...defaults, ...history])];
+      
+      if (!value) {
+        list.classList.remove('show');
+        return;
+      }
+
+      const matches = allValues.filter(v => v.toLowerCase().includes(value));
+      const isNew = value && !allValues.some(v => v.toLowerCase() === value);
+
+      if (matches.length === 0 && isNew) {
+        matches.push({ value: value, isNew: true });
+      }
+
+      list.innerHTML = matches.map((m, i) => {
+        const val = typeof m === 'string' ? m : m.value;
+        const isNewVal = typeof m === 'object' && m.isNew;
+        return `<div class="autocomplete-item" data-value="${val}">${val}${isNewVal ? '<span class="new-tag">NEW</span>' : ''}</div>`;
+      }).join('');
+
+      list.classList.toggle('show', matches.length > 0);
+    });
+
+    input.addEventListener('focus', function() {
+      const value = this.value.toLowerCase().trim();
+      const defaults = autocompleteDefaults[type] || [];
+      const history = autocompleteHistory[type] || [];
+      const allValues = [...new Set([...defaults, ...history])];
+      
+      if (!value && allValues.length > 0) {
+        list.innerHTML = allValues.slice(0, 10).map(v => 
+          `<div class="autocomplete-item" data-value="${v}">${v}</div>`
+        ).join('');
+        list.classList.add('show');
+      } else if (value) {
+        this.dispatchEvent(new Event('input'));
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      setTimeout(() => {
+        const value = this.value.trim();
+        if (value) {
+          const history = autocompleteHistory[type];
+          if (!history.includes(value)) {
+            history.unshift(value);
+            if (history.length > 10) history.pop();
+          }
+        }
+        list.classList.remove('show');
+      }, 150);
+    });
+
+    list.addEventListener('click', function(e) {
+      const item = e.target.closest('.autocomplete-item');
+      if (item) {
+        input.value = item.dataset.value;
+        list.classList.remove('show');
+        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!wrapper.contains(e.target)) {
+        list.classList.remove('show');
+      }
+    });
   }
 
   function mkTag(cfg, checked) {
@@ -1354,11 +1528,12 @@ function pickDir(targetId) {
 
   function validate() {
     const rules = [
-      { id:'specsFolder',    err:'e-specs',  ok: v => v.trim() },
-      { id:'project',        err:null,        ok: v => v.trim() },
-      { id:'featureName',    err:'e-feat',   ok: v => /^[a-z0-9\-]+$/.test(v.trim()) },
-      { id:'targetBranch',   err:'e-branch', ok: v => v.trim() },
-      { id:'functionalDesc', err:'e-func',   ok: v => v.trim().length >= 10 },
+      { id:'specsFolder',    err:'e-specs',    ok: v => v.trim() },
+      { id:'project',        err:null,         ok: v => v.trim() },
+      { id:'featureName',    err:'e-feat',    ok: v => /^[a-z0-9\-]+$/.test(v.trim()) },
+      { id:'branchType',    err:'e-branchType', ok: v => v.trim().length >= 3 },
+      { id:'targetBranch',   err:'e-branch',  ok: v => v.trim() },
+      { id:'functionalDesc', err:'e-func',    ok: v => v.trim().length >= 10 },
     ];
     let ok = true;
     rules.forEach(r => {
@@ -1379,7 +1554,7 @@ function pickDir(targetId) {
     const feat = document.getElementById('featureName').value.trim();
     const br   = document.getElementById('targetBranch').value.trim();
     const issueTracker = document.getElementById('jiraTicket').value.trim();
-    const prM  = document.getElementById('prName').value.trim();
+    const prM  = document.getElementById('branchName').value.trim();
     const fD   = document.getElementById('functionalDesc').value.trim();
     const tD   = document.getElementById('technicalDesc').value.trim();
     const docs = document.getElementById('docsFolder').value.trim() || 'docs';
@@ -1406,7 +1581,7 @@ function pickDir(targetId) {
       type: document.getElementById('branchType').value.trim() || 'feature',
       targetBranch: br,
       issueTracker: issueTracker || null,
-      prName: prM || null,
+      branchName: prM || null,
       functionalDesc: fD,
       technicalDesc: tD || null,
       docsFolder: docs,
@@ -1481,7 +1656,7 @@ function pickDir(targetId) {
   }
 
   function resetForm() {
-    ['project','specsFolder','docsFolder','featureName','issueTracker','prName','referencePaths','functionalDesc','technicalDesc'].forEach(id => {
+    ['project','specsFolder','docsFolder','featureName','issueTracker','branchName','referencePaths','functionalDesc','technicalDesc'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('targetBranch').value = 'develop';
@@ -1496,6 +1671,7 @@ function pickDir(targetId) {
         document.getElementById('jsonOut').style.display = 'none';
     document.getElementById('jsonPh').style.display = 'block';
     document.getElementById('btnCopy').style.display = 'none';
+    updatePreview();
     saveState();
   }
 
@@ -1507,7 +1683,7 @@ function pickDir(targetId) {
       featureName: document.getElementById('featureName')?.value ?? '',
       targetBranch: document.getElementById('targetBranch')?.value ?? 'develop',
       issueTracker: document.getElementById('jiraTicket')?.value ?? '',
-      prName: document.getElementById('prName')?.value ?? '',
+      branchName: document.getElementById('branchName')?.value ?? '',
       isDraft: !!document.getElementById('isDraft')?.checked,
       createWorktree: !!document.getElementById('createWorktree')?.checked,
       isNewProject: !!document.getElementById('isNewProject')?.checked,
@@ -1523,11 +1699,17 @@ function pickDir(targetId) {
       tags: getTags(),
       output: document.getElementById('jsonOut')?.textContent ?? '',
       outputVisible: document.getElementById('jsonOut')?.style.display !== 'none',
+      autocompleteHistory: autocompleteHistory,
     };
   }
 
   function restoreFormState(state) {
     if (!state) return;
+    
+    if (state.autocompleteHistory) {
+      autocompleteHistory = state.autocompleteHistory;
+    }
+
     const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
     setVal('project', state.project);
     setVal('specsFolder', state.specsFolder);
@@ -1535,7 +1717,7 @@ function pickDir(targetId) {
     setVal('featureName', state.featureName);
     setVal('targetBranch', state.targetBranch || 'develop');
     setVal('issueTracker', state.issueTracker);
-    setVal('prName', state.prName);
+    setVal('branchName', state.branchName);
     setVal('referencePaths', state.referencePaths);
     setVal('scanScope', state.scanScope || 'relevant');
     setVal('functionalDesc', state.functionalDesc);
@@ -1574,13 +1756,14 @@ function pickDir(targetId) {
       document.getElementById('btnCopy').style.display = state.outputVisible ? 'flex' : 'none';
     }
   }
+  }
 
   function saveState() {
     vscode.setState(getFormState());
   }
 
   function bindStatePersistence() {
-    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','branchType','issueTracker','prName','referencePaths','scanScope','functionalDesc','technicalDesc','customArchitecture','techStack','initialStructure','architectureSelect'];
+    const ids = ['project','specsFolder','docsFolder','featureName','targetBranch','branchType','issueTracker','branchName','referencePaths','scanScope','functionalDesc','technicalDesc','customArchitecture','techStack','initialStructure','architectureSelect'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1621,10 +1804,19 @@ function pickDir(targetId) {
 
   function bindFormInputs() {
     document.getElementById('featureName')?.addEventListener('input', (e) => {
-      sanitize(e.target); updatePreview();
+      sanitize(e.target);
+      saveState();
+      updatePreview();
     });
-    document.getElementById('prName')?.addEventListener('input', updatePreview);
-    document.getElementById('branchType')?.addEventListener('input', updatePreview);
+    document.getElementById('featureName')?.addEventListener('blur', () => {
+      saveState();
+      updatePreview();
+    });
+    document.getElementById('branchName')?.addEventListener('input', updatePreview);
+    document.getElementById('branchType')?.addEventListener('blur', () => {
+      saveState();
+      updatePreview();
+    });
     document.getElementById('isDraft')?.addEventListener('change', updateDraftTags);
     document.getElementById('customArchitecture')?.addEventListener('input', () => {
             saveState();
@@ -1665,6 +1857,9 @@ function pickDir(targetId) {
   bindFormInputs();
   bindStatePersistence();
   bindWebviewMessages();
+
+  initAutocomplete('branchType', 'branchType');
+  initAutocomplete('targetBranch', 'targetBranch');
 
   restoreFormState(vscode.getState());
   vscode.postMessage({ type: 'requestInitialContext' });
