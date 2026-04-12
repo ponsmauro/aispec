@@ -1312,24 +1312,59 @@ Before executing any command that modifies state (build, test, deploy, etc.):
 
 ---
 
-### Step 6A: WRITE CODE — FUNCTIONAL VIEW
+### Step 6A: WRITE CODE — TDD-STYLE (Tests First)
 
-**For each step in plan.md:**
+**TDD PRINCIPLE: Tests are the specification of behavior, not a coverage metric.**
 
+For each step in plan.md:
+
+**Phase 1: GENERATE TESTS FROM SPEC (TDD-style)**
 1. Read prompt-init.md, context.md for this step
-2. Copy rules INTO your implementation (MANDATORY - write them in code comments)
-3. **Document the expected behavior BEFORE writing code:**
+2. Read the functional description (Step 1 Part B) and failure scenarios
+3. **Generate tests BEFORE writing code:**
+   - Tests describe **expected behavior** from the spec
+   - Tests are derived FROM the specification, not FROM the code
+   - Tests validate WHAT the code should do, not that code exists
+
+```
+📋 TDD TESTS — Generated from Functional Spec
+══════════════════════════════════════════════
+
+Tests for [Step N: name]:
+
+1. [TEST-NAME]: [What behavior is expected]
+   Given: [precondition]
+   When: [action]
+   Then: [expected result]
+
+2. [TEST-NAME]: [Failure scenario from Step 1B]
+   Given: [precondition]
+   When: [action that triggers failure]
+   Then: [expected failure behavior]
+
+... (generate all tests from functional spec + failure scenarios)
+```
+
+**Phase 2: WRITE CODE UNTIL TESTS PASS**
+4. After tests are generated and approved:
+   - Write code
+   - **Run tests**: tests should FAIL initially (expected)
+   - Continue writing code until ALL tests pass
+   - Tests passing = code satisfies the spec
+
+**Phase 3: FUNCTIONAL VIEW**
+5. **Document the expected behavior:**
 
 ```
 📋 FUNCTIONAL VIEW — [Step N: name]
-═══════════════════════════════════════════════
+══════════════════════════════════════════════
 
 Expected behavior at code level:
 - [What triggers what]
 - [Data flow]
 
 ⚠️ FALLBACK PATHS — Document each failure scenario:
-─────────────────────────────────────────────────
+────────────────────────────────────────────────
 For each failure point:
 - If [condition]: [current spec says X]
 - If [condition]: [UNDEFINED - must define]
@@ -1341,24 +1376,39 @@ For each failure point:
 ✅ READY FOR 6B? [User must confirm each UNDEFINED resolved]
 ```
 
-4. **After functional view is approved:**
-   - Write code
-   - **CRITICAL: Replace all magic strings and magic numbers with named constants**
-   - Mark [UNDEFINED] items as resolved in the functional view
-   - Log what was done in plan.md
+6. **CRITICAL: Replace all magic strings and magic numbers with named constants**
+7. Log what was done in plan.md
+
+**TDD vs Coverage-driven:**
+```
+❌ COVERAGE-DRIVEN (WRONG):
+   - Write code first
+   - Generate tests to reach 80% coverage
+   - Tests verify code exists, not behavior
+
+✅ TDD-STYLE (CORRECT):
+   - Read functional spec
+   - Generate tests from spec (tests FAIL first)
+   - Write code until tests pass
+   - Tests verify behavior matches spec
+```
 
 **Checklist for Step 6A:**
-- [ ] 1. Read prompt-init.md for this step
-- [ ] 2. Functional view documented
-- [ ] 3. All [UNDEFINED] items resolved by user
-- [ ] 4. Rules copied into code (as comments, not referenced)
-- [ ] 5. Code written
-- [ ] 6. **Magic strings/numbers replaced with named constants**
-- [ ] 7. Logged in plan.md
+- [ ] 1. Read functional spec (Step 1 Part B + failure scenarios)
+- [ ] 2. Tests generated FROM spec (not from code)
+- [ ] 3. Tests FAIL initially (expected in TDD)
+- [ ] 4. Code written until all tests pass
+- [ ] 5. Functional view documented
+- [ ] 6. All [UNDEFINED] items resolved by user
+- [ ] 7. Rules copied into code (as comments, not referenced)
+- [ ] 8. **Magic strings/numbers replaced with named constants**
+- [ ] 9. Logged in plan.md
 
 ---
 
 ### Step 6B: VALIDATE — TECHNICAL VIEW
+
+**Tests were already generated in Step 6A. This step validates quality.**
 
 **For each step in plan.md:**
 
@@ -1366,7 +1416,7 @@ For each failure point:
 
 ```
 📊 TECHNICAL VIEW — [Step N: name]
-═══════════════════════════════════════════════
+══════════════════════════════════════════════
 
 Files modified:
   + [new file]
@@ -1385,7 +1435,7 @@ DO NOT invent or fabricate tool output.
 2. **Run validation:**
    - Verify NO magic strings or magic numbers remain in code
    - Run ALL available review tools (linters, formatters, type checkers, etc.)
-   - IF all review tools pass → Run tests
+   - IF all review tools pass → Run tests (from Step 6A)
    - Verify: REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
 
 **Evidence required (show output before marking done):**
@@ -1396,16 +1446,19 @@ DO NOT invent or fabricate tool output.
 **Checklist for Step 6B:**
 - [ ] 1. **No magic strings/numbers in code**
 - [ ] 2. All review tools passed (list which tools ran)
-- [ ] 3. Tests written
-- [ ] 4. Tests passed
-- [ ] 5. REUSE checked
-- [ ] 6. ARCHITECTURE checked
-- [ ] 7. PERFORMANCE checked
-- [ ] 8. BROWNFIELD checked
-- [ ] 9. CONSISTENCY checked
-- [ ] 10. SECURITY checked
+- [ ] 3. Tests (from 6A) run and passed
+- [ ] 4. REUSE checked
+- [ ] 5. ARCHITECTURE checked
+- [ ] 6. PERFORMANCE checked
+- [ ] 7. BROWNFIELD checked
+- [ ] 8. CONSISTENCY checked
+- [ ] 9. SECURITY checked
 
-⚠️ IMPORTANT: You must complete Step 6A (Functional View) before Step 6B (Technical View). Both require user validation.
+⚠️ IMPORTANT: 
+- Step 6A has 3 phases: Tests → Code → Functional View
+- Tests are generated BEFORE code (TDD-style)
+- Code is written UNTIL tests pass
+- Step 6B validates quality after tests pass
 
 **WAIT for approval between steps**
 
