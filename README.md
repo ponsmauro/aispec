@@ -85,7 +85,6 @@ AISpec generates a complete 7-step development plan that forces AI to:
 5. **Generate plan.md** (step-by-step with checks)
 6. **Implement** (with validation at each step)
 7. **Finalize** (docs, tests, PR ready)
->>>>>>> origin/main
 
 ---
 
@@ -335,7 +334,6 @@ code --install-extension aispec-0.0.19.vsix
 1. Reload VS Code window: `Cmd/Ctrl + Shift + P` → "Reload Window"
 2. Check if extension is enabled: `Extensions` → `AISpec` → Enable
 3. If still not working, check VS Code version (requires 1.85.0+)
->>>>>>> origin/main
 
 ---
 
@@ -360,5 +358,3 @@ code --install-extension aispec-0.0.19.vsix
 ---
 
 *MIT License — github.com/ponsmauro/aispec*
-=======
->>>>>>> origin/main
