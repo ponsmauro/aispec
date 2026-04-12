@@ -690,6 +690,82 @@ This is a DISCOVERY and PLANNING phase:
 
 ---
 
+## ⚠️ GIT OPERATIONS — Critical Constraints
+
+🚫 **FORBIDDEN** (require explicit user approval):
+- `git commit`
+- `git push`
+- `git merge`
+- Creating PRs or MRs on any platform
+- Any command that modifies remote state
+
+✅ **ALLOWED without approval** (read-only operations):
+- `git status`
+- `git diff`
+- `git log`
+- `git branch` (list only)
+- `git show`
+- `git fetch`
+
+📋 **Local branch creation** (suggested, not required):
+- You may create a local branch for this feature
+- All work happens on the feature branch
+- Branch will be committed/pushed when you receive explicit approval
+
+⏸️ **Final approval required:**
+After all gates are passed and you have EXPLICIT user approval to commit,
+then you may execute: git commit, git push, and create PR.
+
+---
+
+## ⚡ CHALLENGE PROTOCOL — Surface Doubts Before Executing
+
+At EVERY step, BEFORE executing, check for:
+
+**1. INPUT CONTRADICTIONS**
+- User spec vs. existing patterns
+- Example: User says "use tabs" but project uses spaces
+
+**2. RULE CONFLICTS**
+- Declared rule vs. existing implementation
+- Example: "No magic numbers" but existing code has hardcoded values
+
+**3. UNMEASURABLE CRITERIA**
+- Acceptance criteria that cannot be verified
+- Example: "must be fast" without definition of fast
+
+**4. UNDEFINED BEHAVIOR**
+- Scenarios not covered in the specification
+- Example: "What happens if the API call fails?"
+
+When any of these is found, PRESENT BEFORE EXECUTING:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ⚠️ CHALLENGE DETECTED                                 │
+├─────────────────────────────────────────────────────────┤
+│ Type: [CONFLICT / UNDEFINED / UNMEASURABLE / OTHER]    │
+│                                                         │
+│ Description: [brief description of the issue]          │
+│                                                         │
+│ Found in spec:     [what user wrote]                     │
+│ Found in project: [what exists]                         │
+│ Evidence:          [file references if applicable]      │
+│                                                         │
+│ Recommendation: [suggested resolution]                  │
+│                                                         │
+│ ⏸️ STOPPED: Waiting for your decision                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+Do NOT:
+- ❌ Assume and continue
+- ❌ Pick a side silently
+- ❌ "Fix it later"
+- ❌ Skip without mentioning
+
+---
+
 ## PROGRESS CHECKLIST (Update as you go)
 - [ ] Step 1: Input Data Confirmed (Parts A, B, C)
 - [ ] Step 2: Rules Displayed & Understood
@@ -750,6 +826,40 @@ Then REFINE and present clearly:
 [Include key points from referenced docs]
 ```
 
+---
+
+**📋 FAILURE SCENARIOS — Required for complete specification**
+
+Before proceeding, help identify what can go wrong:
+
+Ask the user:
+> "To ensure complete coverage, let's identify failure scenarios:
+>
+> 1. What happens if an **external dependency** fails?
+>    (e.g., API returns error, timeout, or invalid data)
+>
+> 2. What happens if **data is invalid or missing**?
+>    (e.g., empty input, null values, malformed data)
+>
+> 3. What happens if a **resource is unavailable**?
+>    (e.g., database connection lost, disk full)
+>
+> 4. What happens in **concurrent scenarios**?
+>    (e.g., two users perform this action simultaneously)
+>
+> 5. Are there other **known failure cases**?
+
+For each confirmed failure scenario, document:
+```
+## Failure: [scenario description]
+- Trigger: [what causes it]
+- Expected behavior: [what should happen]
+```
+
+These failure scenarios will feed into the FUNCTIONAL VIEW of Step 6.
+
+---
+
 **If user says "not correct" or wants changes:**
 → Ask: "What should be different?"
 → Update and show again
@@ -757,7 +867,8 @@ Then REFINE and present clearly:
 
 **Checklist Part B:**
 - [ ] 1. Description refined and clear
-- [ ] 2. User approved
+- [ ] 2. Failure scenarios documented (if any)
+- [ ] 3. User approved
 
 ✅ All OK! → **WAIT for user approval.**
 
@@ -828,9 +939,45 @@ Display all rules that must be followed throughout the project.
 - ✅ Use ✅ for required, ❌ for forbidden
 - ✅ Wait for user approval to confirm understanding
 
+**Conflict Detection:**
+If you find conflicting rules (e.g., one file says "use spaces" and another says "use tabs"), present using this format:
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│ ⚠️ CONFLICT DETECTED                                             │
+├───────────────────────────────────────────────────────────────────┤
+│ CONFLICT #[N]: [brief description]                               │
+│                                                                   │
+│ ┌─ Source A ──────────────────────────────────────────────────┐ │
+│ │ File:     [file:line]                                       │ │
+│ │ Rule:     "[exact rule text]"                              │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│ ┌─ Source B ──────────────────────────────────────────────────┐ │
+│ │ File:     [file:line]                                       │ │
+│ │ Rule:     "[exact rule text]"                              │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│ Analysis:                                                         │
+│ - [Which is more specific and why]                               │
+│ - Prevalence in codebase: [statistics]                          │
+│                                                                   │
+│ Recommendation: Follow [A/B] because [reason]                    │
+│                                                                   │
+│ Options:                                                         │
+│   [1] Accept recommendation                                     │
+│   [2] Follow Source A only                                      │
+│   [3] Follow Source B only                                       │
+│   [4] Define a new rule: [propose]                             │
+│                                                                   │
+│ ⏸️ WAITING for selection...                                     │
+└───────────────────────────────────────────────────────────────────┘
+```
+
 **Checklist:**
 - [ ] 1. All rules displayed
-- [ ] 2. User approved understanding
+- [ ] 2. Conflicts presented (if any)
+- [ ] 3. User approved understanding
 
 ✅ All OK! → **WAIT for user approval.**
 
@@ -1056,56 +1203,63 @@ Create the implementation plan with rules copied into each step.
 
 **Action**: Create plan.md at `{{project}}/{{specsFolder}}/{{featureName}}/plan.md`
 
-**Output** (this is what you must write to the file):
+**Each step MUST follow this exact format:**
+
 ```
-# Plan - {{featureName}}
+### Step N: [name] — complexity: [LOW|MEDIUM|HIGH]
 
-See context.md for complete information.
+**Purpose:** 
+[1-2 sentences: what this step accomplishes]
 
-## Implementation Steps
+**Implementation:**
+- [Specific action 1]
+- [Specific action 2]
 
-{{#isNewProject}}
-### Step 1: Create base project structure
-- Description: Set up initial project structure based on tech stack ({{techStack}})
-- Rules: Follow best practices for {{architecture}} architecture
-- Context: Reference context.md for recommended structure
-- Include: package.json/go.mod, basic folders, .gitignore, initial configs
-- Acceptance: Project compiles/runs basic command
-- Dependencies: None
+**Rules (copied inline — NEVER referenced):**
+- [EXACT rule text] [from: source file]
+- [EXACT rule text] [from: source file]
 
-{{/isNewProject}}
-### {{#isNewProject}}2{{/isNewProject}}{{^isNewProject}}1{{/isNewProject}}: [Name]
-- Description: [what this step does]
-- Rules (from prompt-init.md): [COPY rules HERE - not at top]
-- Context: [reference context.md if needed]
-- Checks: REUSE, ARCHITECTURE ({{architecture}}), PERFORMANCE, {{#isNewProject}}GREENFIELD{{/isNewProject}}{{^isNewProject}}BROWNFIELD{{/isNewProject}}, CONSISTENCY, SECURITY
-- Acceptance: [measurable result]
-- Dependencies: [what must be done first]
+**Pre-flight Checks:**
+- [ ] REUSE: Search existing code first — found: [what/references]
+- [ ] ARCHITECTURE: Complies with [architecture]? [YES/NO — explain]
+- [ ] PERFORMANCE: [issue to check]? [YES/NO/NA]
+- [ ] BROWNFIELD: What else uses this? [existing consumers]
+- [ ] CONSISTENCY: Matches existing patterns? [YES/NO — explain]
+- [ ] SECURITY: Input validation? [YES/NO — what]
 
-### Step {{#isNewProject}}3{{/isNewProject}}{{^isNewProject}}2{{/isNewProject}}: [Name]
-... (same structure)
+**Acceptance Criteria:**
+[Specific, measurable, verifiable]
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+
+**Dependencies:**
+- Requires: [prior step N or none]
+- Required by: [step N+1]
 ```
 
 **Instructions for this step:**
-1. Rules must be copied INTO each step (NOT at the top)
+1. Rules must be copied INTO each step (NOT at the top, NOT referenced)
 2. Reference context.md for additional info
 3. If new info found → update context.md first
 4. Each step must have all fields filled
+5. At least one rule must be copied (never just reference "prompt-init.md")
 {{#isNewProject}}
-5. FIRST step must create base project structure
-6. SECOND step onwards implement the feature{{/isNewProject}}
+6. FIRST step must create base project structure
+7. SECOND step onwards implement the feature{{/isNewProject}}
 
 ⚠️ IMPORTANT:
 - ❌ WRONG: "Follow rules in prompt-init.md"
-- ✅ CORRECT: Copy actual rule: "MUST use camelCase for functions"
+- ❌ WRONG: "Use best practices"
+- ✅ CORRECT: "MUST use camelCase for exported functions [from: src/utils/helpers.go:15]"
+- ✅ CORRECT: "MUST validate input is non-null [from: AGENTS.md:23]"
 
 **Checklist:**
 - [ ] 1. Doubts clarified by re-reading project
 - [ ] 2. New info added to context.md
 - [ ] 3. context.md referenced
-- [ ] 4. Rules copied INTO each step
-- [ ] 5. REUSE considered for each step - "Does this already exist? Can I reuse?"
-- [ ] 6. ARCHITECTURE compliance verified for each step - "Does this comply with {{architecture}}?"
+- [ ] 4. Rules copied INTO each step (not referenced)
+- [ ] 5. REUSE considered for each step
+- [ ] 6. ARCHITECTURE compliance verified for each step
 - [ ] 7. plan.md created
 
 ✅ All OK! → **Show summary and WAIT for user approval.**
@@ -1123,146 +1277,351 @@ Question: "Do you want to validate each development stage?"
 
 ---
 
-### Step 6A: WRITE CODE
-**For each step in plan.md:**
-1. Read prompt-init.md, context.md for this step
-2. Copy rules INTO your implementation (MANDATORY - write them in code comments)
-3. Write code
-4. **CRITICAL: Replace all magic strings and magic numbers with named constants**
-   - Search for hardcoded strings (error messages, URLs, keys, etc.)
-   - Search for hardcoded numbers (timeouts, limits, sizes, etc.)
-   - **FIRST: Check if a constant already exists that you can reuse**
-   - If no existing constant, create a new one with descriptive name
-5. Log what was done in plan.md
+## ⚠️ FILE DELETION PROTOCOL —MANDATORY
 
-**Checklist for Step 6A:**
-- [ ] 1. Read prompt-init.md for this step
-- [ ] 2. Rules copied into code (as comments, not referenced)
-- [ ] 3. Code written
-- [ ] 4. **Magic strings/numbers replaced with named constants**
-- [ ] 5. Logged in plan.md
+When you need to delete files:
+
+1. **LIST files to be deleted:**
+   - /path/to/file1.ext
+   - /path/to/file2.ext
+
+2. **DO NOT delete physically yet.**
+
+3. **WAIT for user approval of deletion list.**
+
+4. **AFTER approval:**
+   - If user approves → Move files to system trash/recycle bin (do NOT permanently delete)
+   - If user wants to keep → skip deletion
+
+**Recovery option:** Files sent to system trash can be recovered by the user manually.
 
 ---
 
-### Step 6B: VALIDATE
+## ⚡ DRY RUN — Before State-Modifying Commands
+
+Before executing any command that modifies state (build, test, deploy, etc.):
+
+1. **SHOW what you WILL execute:**
+   ```
+   $ [command to run]
+   ```
+
+2. **Ask:** "Ready to proceed? [YES/NO]"
+
+3. **After approval:** Execute and show output
+
+---
+
+### Step 6A: WRITE CODE — FUNCTIONAL VIEW
+
 **For each step in plan.md:**
-1. **Verify NO magic strings or magic numbers remain in code**
-2. Run ALL available review tools in this project (linters, formatters, type checkers, security scanners, static analyzers, etc.)
-3. IF all review tools pass → Run tests
-4. Verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
+
+1. Read prompt-init.md, context.md for this step
+2. Copy rules INTO your implementation (MANDATORY - write them in code comments)
+3. **Document the expected behavior BEFORE writing code:**
+
+```
+📋 FUNCTIONAL VIEW — [Step N: name]
+═══════════════════════════════════════════════
+
+Expected behavior at code level:
+- [What triggers what]
+- [Data flow]
+
+⚠️ FALLBACK PATHS — Document each failure scenario:
+─────────────────────────────────────────────────
+For each failure point:
+- If [condition]: [current spec says X]
+- If [condition]: [UNDEFINED - must define]
+
+[UNDEFINED] items BLOCK advancement to 6B:
+  - [#UNDEF-001]: [scenario] — [question to resolve]
+  - [#UNDEF-002]: [scenario] — [question to resolve]
+
+✅ READY FOR 6B? [User must confirm each UNDEFINED resolved]
+```
+
+4. **After functional view is approved:**
+   - Write code
+   - **CRITICAL: Replace all magic strings and magic numbers with named constants**
+   - Mark [UNDEFINED] items as resolved in the functional view
+   - Log what was done in plan.md
+
+**Checklist for Step 6A:**
+- [ ] 1. Read prompt-init.md for this step
+- [ ] 2. Functional view documented
+- [ ] 3. All [UNDEFINED] items resolved by user
+- [ ] 4. Rules copied into code (as comments, not referenced)
+- [ ] 5. Code written
+- [ ] 6. **Magic strings/numbers replaced with named constants**
+- [ ] 7. Logged in plan.md
+
+---
+
+### Step 6B: VALIDATE — TECHNICAL VIEW
+
+**For each step in plan.md:**
+
+1. **Show TECHNICAL VIEW:**
+
+```
+📊 TECHNICAL VIEW — [Step N: name]
+═══════════════════════════════════════════════
+
+Files modified:
+  + [new file]
+  ~ [modified file]
+  - [deleted file] (in system trash, recoverable)
+
+🔧 TOOL OUTPUT (real output only)
+─────────────────────────────────
+$ [command run]
+[actual output]
+
+If tool not configured → state "[TOOL] not configured" and skip
+DO NOT invent or fabricate tool output.
+```
+
+2. **Run validation:**
+   - Verify NO magic strings or magic numbers remain in code
+   - Run ALL available review tools (linters, formatters, type checkers, etc.)
+   - IF all review tools pass → Run tests
+   - Verify: REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
 
 **Evidence required (show output before marking done):**
-- [ ] Run available review tools in this project (lint, test, typecheck, security, etc.)
-- [ ] Show actual output of each tool that exists
-- [ ] If tool doesn't exist → state "X not configured" and skip
+- [ ] Run available review tools (show actual output)
+- [ ] If tool doesn't exist → state "[TOOL] not configured" and skip
 - [ ] DO NOT invent tools that don't exist
 
 **Checklist for Step 6B:**
-- [ ] 1. **No magic strings/numbers in code - all replaced with named constants**
+- [ ] 1. **No magic strings/numbers in code**
 - [ ] 2. All review tools passed (list which tools ran)
 - [ ] 3. Tests written
 - [ ] 4. Tests passed
-- [ ] 5. REUSE checked - "Does this already exist? Can I reuse existing code?"
-- [ ] 6. ARCHITECTURE checked - "Does this comply with {{architecture}}?"
+- [ ] 5. REUSE checked
+- [ ] 6. ARCHITECTURE checked
 - [ ] 7. PERFORMANCE checked
 - [ ] 8. BROWNFIELD checked
 - [ ] 9. CONSISTENCY checked
 - [ ] 10. SECURITY checked
 
-⚠️ IMPORTANT: You must complete Step 6A before Step 6B. Both steps require user validation.
+⚠️ IMPORTANT: You must complete Step 6A (Functional View) before Step 6B (Technical View). Both require user validation.
 
-**WAIT for approval between steps (if user chose YES)**
+**WAIT for approval between steps**
 
 ---
 
-## STEP 7: FINALIZE
-Complete the project with QA and PR.
+## STEP 7: FINALIZE — Sequential Gates
 
-**Action**:
-1. Run full QA (tests, linters, type checks, security scan, static analysis)
-2. Scan {{docsFolder}}/ directory and ALL .md files in project to understand what documentation exists, then generate relevant docs
-3. If the feature adds/modifies an API → generate or update API specification (Swagger/OpenAPI, GraphQL schema, ProtoBuf, etc.)
-4. If the feature affects external integrations → document them
-5. Create PR
+⚠️ Each gate requires user approval before proceeding.
+
+---
+
+### STATE SUMMARY
+
+Before each gate, provide this summary:
+
+```
+═══════════════════════════════════════════════
+📊 PROJECT STATE
+═══════════════════════════════════════════════
+Steps completed: N/7
+Files changed: [+N] [~N] [-N]
+Open [UNDEFINED]: N
+Last gate passed: [step name]
+Feature complete: [YES/NO]
+═══════════════════════════════════════════════
+Ready to proceed? [User approval required]
+```
+
+---
+
+### GATE 7.1: Full QA
+
+**Action:** Run all quality tools (dry run first)
+
+```
+$ [test command]
+[actual output]
+
+$ [lint command]
+[actual output]
+
+$ [typecheck command]
+[actual output]
+```
+
+If tool not configured → state "[TOOL] not configured" and skip
+
+**Show summary:**
+- Tests: X passed, Y failed
+- Lint: Z issues
+- Typecheck: [clean/issues]
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.1: QA Results                        │
+│                                             │
+│ [ ] All tools passed                        │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.2: Documentation (Suggested)
+
+**Action:** Scan docs and suggest updates
+
+⚠️ These are suggestions only — proceed regardless of completion.
+
+```
+Suggested documentation updates:
+- [ ] Update [file.md] (if exists)
+- [ ] Update API specs (if API changed)
+- [ ] Update integration docs (if applicable)
+
+If no existing docs folder → ask user where to create documentation
+```
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.2: Documentation                     │
+│                                             │
+│ [ ] Documentation reviewed (if applicable)  │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.3: Show Final Changes
+
+**Action:** Show what will be committed
+
+```
+═══════════════════════════════════════════════
+📋 FINAL CHANGES SUMMARY
+═══════════════════════════════════════════════
+
+Files created:
+  + [file1]
+  + [file2]
+
+Files modified:
+  ~ [file3]
+  ~ [file4]
+
+Files deleted (in system trash):
+  - [file5] (recoverable from system trash)
+
+Total: +N files, ~N files, -N files
+
+═══════════════════════════════════════════════
+```
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.3: Changes Review                   │
+│                                             │
+│ [ ] User reviewed all changes               │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.4: Commit & Push
+
+⚠️ This is the ONLY gate where user approval is REQUIRED for git operations.
+
+**Suggested commit message:**
+```
+[type]: [feature-name]{{#issueTracker}} [{{issueTracker}}]{{/issueTracker}}
+```
+
+**For this step, you have EXPLICIT user approval to:**
+- ✅ `git add` (stage changes)
+- ✅ `git commit` (create local commit)
+- ✅ `git push` (push to remote)
+- ✅ Create PR/MR on GitHub/GitLab/etc.
+
+**If user does NOT approve:**
+→ All changes remain staged/unstaged locally
+→ Do NOT commit, push, or create PR
+→ User can manually handle git operations
+
+---
 
 {{#isNewProject}}
----
+### GATE 7.5: New Project Setup
 
-## STEP 7B: SETUP NEW PROJECT (Greenfield)
 Since this is a NEW project, create the initial setup for future development.
 
-**Action**:
-1. Create AI agent configuration file (choose one or more based on the tech stack):
-   - AGENTS.md (for AI agents)
-   - CLAUDE.md (for Claude)
-   - .cursorrules (for Cursor)
-   - .windsurfrules (for Windsurf)
-   - CONVENTIONS.md (project conventions)
+**Suggested actions:**
+1. Create AI agent configuration file (optional):
+   - AGENTS.md, CLAUDE.md, .cursorrules, .windsurfrules, CONVENTIONS.md
 
-2. Create initial documentation:
-   - README.md (project overview, tech stack, how to run)
-   - CONTRIBUTING.md (how to contribute)
-   - .gitignore (appropriate for the tech stack)
-   - Any other essential project files
+2. Create initial documentation (optional):
+   - README.md
+   - CONTRIBUTING.md
+   - .gitignore
 
-3. Initialize git repository if not already done
-
-**Output** (create these files):
-```
-# AGENTS.md
-
-## Project Overview
-- Name: {{project}}
-- Tech Stack: {{techStack}}
-- Architecture: {{architecture}}
-
-## Development Rules
-[Rules for AI agents working on this project]
-
-## Commands
-[How to run tests, build, etc.]
-```
-
-```
-# README.md
-
-# {{project}}
-
-## Tech Stack
-{{techStack}}
-
-## Getting Started
-[How to set up and run the project]
-
-## Architecture
-{{architecture}}
-```
+┌─────────────────────────────────────────────┐
+│ GATE 7.5: Project Setup                     │
+│                                             │
+│ [ ] Setup suggestions reviewed              │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
 {{/isNewProject}}
 
-**Instructions for this step:**
-1. All steps must show [x] completed in plan.md
-2. Tests must pass (aim for 100% coverage or project standard)
-3. Linters/type checkers must be clean
-4. Docs must be generated based on what's needed
-5. If API changed → integrate API documentation
-6. If no existing docs folder → ask user where to create documentation
-{{#isNewProject}}
-7. Create AI agent configuration files
-8. Create initial project documentation{{/isNewProject}}
+---
 
-**Final checklist:**
-- [ ] 1. All plan steps completed [x]
-- [ ] 2. Tests passing
-- [ ] 3. Linters/type checkers clean
-- [ ] 4. Security scan passed
-- [ ] 5. API docs updated if needed
-- [ ] 6. Docs generated
-{{#isNewProject}}
-- [ ] 7. AI agent config created (AGENTS.md, CLAUDE.md, etc.)
-- [ ] 8. Project documentation created (README.md, CONTRIBUTING.md){{/isNewProject}}
-- [ ] {{#isNewProject}}9{{/isNewProject}}{{^isNewProject}}7{{/isNewProject}}. PR created
+### FINAL CHECKLIST
 
-✅ All OK! → **WAIT for user approval for merge.**
+┌─────────────────────────────────────────────────────────────┐
+│ ✅ FEATURE COMPLETE                                         │
+├─────────────────────────────────────────────────────────────┤
+│ □ All plan steps completed [x]                              │
+│ □ Tests passing                                            │
+│ □ Linters/type checkers clean                              │
+│ □ Security scan passed (if configured)                     │
+│ □ Documentation updated (if applicable)                     │
+│ □ Changes committed and pushed (if approved)                │
+│ □ PR/MR created (if approved)                              │
+│                                                             │
+│ {{#issueTracker}}□ Jira linked: [{{issueTracker}}]{{/issueTracker}}         │
+│                                                             │
+│ ⏸️ READY FOR MERGE APPROVAL                               │
+└─────────────────────────────────────────────────────────────┘
+
+---
+
+## ⚠️⚠️⚠️ FINAL REMINDER — FOLLOW ALL STEPS ⚠️⚠️⚠️
+
+This prompt contains EXPLICIT instructions that MUST be followed in ORDER:
+
+```
+═══════════════════════════════════════════════════════════════════
+📋 MANDATORY EXECUTION CHECKLIST
+═══════════════════════════════════════════════════════════════════
+
+□ Read ALL instructions before starting
+□ Follow steps in ORDER (1 → 2 → 3 → 4 → 5 → 6 → 7)
+□ Wait for approval at EVERY gate
+□ Copy rules INTO each step (never reference them)
+□ Execute ALL checks (REUSE, ARCHITECTURE, PERFORMANCE, etc.)
+□ Do NOT skip any step
+□ Do NOT assume behavior — ask when undefined
+□ Do NOT commit, push, or create PR without explicit user approval
+□ Use DRY RUN before executing state-modifying commands
+□ Move deleted files to system trash (recoverable)
+□ Surface CHALLENGES before executing, not after
+
+FAILURE TO FOLLOW THESE INSTRUCTIONS WILL RESULT IN:
+- Incorrect implementation
+- Missed requirements
+- Wasted time and tokens
+- User dissatisfaction
+
+Your job is to FOLLOW these instructions, not to bypass them.
+
+═══════════════════════════════════════════════════════════════════
+```
 
 ---
 
@@ -1272,6 +1631,7 @@ Since this is a NEW project, create the initial setup for future development.
 - Numbered lists (1., 2., 3.)
 - Checkboxes ([ ] not started, [x] completed)
 - Headers (### Step N)
+- Use box-drawing characters for tables and cards
 
 ### FEEDBACK LOOP
 - User says "no/wrong" → STOP, ask what's wrong, fix
