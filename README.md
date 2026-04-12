@@ -15,286 +15,213 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=PonsMauro.aispec">
     <img src="https://img.shields.io/visual-studio-marketplace/v/PonsMauro.aispec?label=VS%20Code%20Marketplace&color=007ACC" alt="VS Code Marketplace"/>
   </a>
-  <img src="https://img.shields.io/badge/version-0.0.17-blue" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
 </p>
 
 ---
 
-## 😤 The Problem
+## Imagine you're driving to vacation in your latest-model car...
 
-You're coding with AI, but:
-- ❌ AI forgets your project rules
-- ❌ AI adds features you didn't ask for  
-- ❌ AI skips important steps
-- ❌ Quality checks are forgotten
-- ❌ You spend more time fixing AI mistakes than coding
+**You have two options:**
 
-**Sound familiar?** That's because AI prompts are too vague. AISpec makes them **impossible to ignore**.
-
----
-
-## 💰 Save Tokens, Save Money
-
-**The hidden cost of AI-assisted development:** Every "fix this" iteration costs tokens and money.
-
-| Without AISpec | With AISpec |
-|----------------|-------------|
-| ❌ AI forgets rules → 3-5 corrections | ✅ Rules copied into every step |
-| ❌ Skips quality checks → bugs found later | ✅ Mandatory checks at each step |
-| ❌ "Just make it work" → technical debt | ✅ Architecture enforced from start |
-| ❌ Multiple iterations → $$ wasted | ✅ First-attempt accuracy |
-| 💸 **5-10 iterations** = Token costs add up | 💰 **1-2 iterations** = Minimal costs |
-
-**Typical savings: 50-80% reduction in AI token costs per feature**
+| Without a map/GPS | With a map/GPS |
+|---|---|
+| you'll probably get lost | you arrive at your destination |
+| you'll burn more gas (tokens) | you save gas |
+| you'll take longer than planned | you get there faster |
+| the stress ruins the vacation | you actually enjoy the trip |
 
 ---
 
-## ⚡ Optimized for AI-Assisted Development
+## AI development is the same
 
-Love AI-assisted coding? Hate fixing AI mistakes?
+Your AI tool (Claude, Cursor, Copilot, etc.) is like that latest-model car — powerful, fast, ready to go.
 
-AISpec keeps your velocity while adding just enough structure:
+But if you ask it for code without a clear plan:
 
-- **PLAN MODE** → Discovery before coding (no more "oops, wrong approach")
-- **7-step workflow** → AI follows your rules perfectly, not "creatively"
-- **Human checkpoints** → You approve before AI continues (no surprises)
-- **Works with ANY AI** → Claude, GPT, Cursor, Windsurf, Copilot, Gemini...
+- ⏱️ Takes longer to get there
+- ⛽ Burns more tokens
+- 🛣️ Might take wrong paths
+- 😤 Ends in frustration and code review
 
-**Code faster. Fix less. Ship more.**
+**With AISpec as your GPS:**
 
----
+- 🗺️ Every step is mapped out
+- ⛽ Optimal token usage
+- 🏁 Code that exactly matches what you asked for
 
-## 🤔 What is AISpec?
-
-AISpec attempts to solve the biggest problem with AI-assisted development: **AI agents TRY to follow instructions, but they forget, skip steps, and make assumptions.**
-
-You fill a simple form, and AISpec generates a complete 7-step development plan with:
-- Rules copied into EVERY step
-- Mandatory quality checks
-- Architecture enforcement
-- User approval at each stage
-
-**Works with Claude, GPT, Gemini, Cursor, Windsurf, or ANY AI.**
+> [!TIP]
+> AISpec doesn't replace your AI. It tells it exactly where to go and how to get there.
 
 ---
 
-## 🌐 Universal Compatibility
+## The Problem (now in technical terms)
 
-AISpec is **completely agnostic** — it doesn't care what you use:
-
-| Category | Works With |
-|----------|------------|
-| **AI Agents** | Claude, GPT-4, Gemini, Cursor, Windsurf, Copilot, Codeium, any LLM |
-| **Languages** | Python, JavaScript, TypeScript, Go, Rust, Java, C#, Ruby, PHP, any |
-| **Frameworks** | React, Vue, Angular, Django, FastAPI, Rails, Laravel, Spring, any |
-| **Architectures** | Hexagonal, Clean, Layered, Microservices, Serverless, any |
-| **Project Types** | New projects, legacy code, greenfield, brownfield |
-
-**You don't change your stack. AISpec adapts to it.**
-
----
-
-## 🌟 Comparison
-
-| Feature | AISpec | Manual Prompting |
-|---------|--------|------------------|
-| Rules in every step | ✅ | ❌ |
-| Auto-detect project rules | ✅ | ❌ |
-| Conflict detection | ✅ | ❌ |
-| Architecture enforcement | ✅ | ❌ |
-| Quality checks | ✅ | ❌ |
-| Human approval workflow | ✅ | ❌ |
-| Works with ANY AI | ✅ | ❌ |
-
----
-
-## 🎁 What You Get
-
-AISpec generates three key files that guide AI agents through your feature development.
-
-**Location:** `{your-project}/{specs-folder}/{feature-name}/`
-
-When you click **Generate & Copy**, you get ready-to-use prompts for:
-
-### 📄 `prompt-init.md` — Initial Setup
-- All input data collected from the form
-- Project configuration and rules
-- Reference documentation paths
-- Foundation for the entire workflow
-
-### 📄 `context.md` — Project Snapshot
-- Your refined vision
-- AI config files detected
-- Architecture & conventions
-- Current status & tech debt
-- Decisions made
-
-### 📋 `plan.md` — Implementation Plan
-```
-### Step 1: Create base structure
-├── RULES: (copied from your files)
-├── CHECKS: REUSE, PERFORMANCE, SECURITY
-├── ARCHITECTURE: (Hexagonal/Layered/etc)
-└── ACCEPTANCE: Project compiles
-
-### Step 2: Implement feature
-├── RULES: (copied from your files)
-├── CHECKS: REUSE, PERFORMANCE, SECURITY
-└── ...
-```
-
----
-
-## ✨ Why AISpec Works
-
-### 1. Rules That Actually Get Followed
+An SDD [Software Design Document — a document describing what to build] defines WHAT to build, but it doesn't enforce HOW. That's why AI improvises, forgets rules, and creates the mess you later fix in code review.
 
 ```
-Every plan step includes:
-📋 RULES (copied directly, not referenced)
-   • "Use camelCase for functions"
-   • "2-space indentation"
-   • "NO magic strings or numbers - use named constants"
-
-🔍 MANDATORY CHECKS
-   • PLAN MODE: Discovery before coding
-   • REUSE: Search existing code first
-   • ARCHITECTURE: Does this comply with the design?
-   • PERFORMANCE: Check for N+1 queries
-   • SECURITY: Input validation?
-   • BROWNFIELD: What else uses this?
+SDD → AI reads it → "Sounds good, I'll do it my way" → Code that doesn't match → Fix → Fix → Fix → Fix → Fix
 ```
 
-### 2. 7-Step Workflow With Human Approval
+Result:
+- ❌ Rules forgotten by step 3
+- ❌ Tests written after (if at all)
+- ❌ Coverage around 30%
+- ❌ 5-10 iterations per feature
+- ❌ 100% token usage
 
-```
-STEP 0: SWITCH TO PLAN MODE - Discovery & planning phase
-STEP 1: Confirm Input Data (user approves)
-STEP 2: Show Plugin Rules (mandatory)
-STEP 3: Create prompt-init.md (rules file)
-STEP 4: Read Project & Create context.md
-STEP 5: Generate Plan (ask doubts first)
-STEP 6: Implement (with validation)
-STEP 7: Finalize & QA
-```
-
-### 3. Greenfield & Brownfield Support
-
-| New Project (Greenfield) | Existing Project (Brownfield) |
-|--------------------------|-------------------------------|
-| Creates base structure first | Scans existing code patterns |
-| Sets up architecture | Respects current patterns |
-| Generates boilerplate | Integrates with existing |
-
-### 4. Conflict Detection
-
-AISpec finds conflicting rules and asks YOU which one to follow:
-```
-⚠️ CONFLICT: Indentation
-  1. 2 spaces (3 files)
-  2. Tabs (1 file)
-  
-Which rule? [1/2]
-```
-
-### 5. Auto-Detection
-
-Automatically discovers:
-- **AI Agent Configs**: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.
-- Your project's documentation
-- Architecture guidelines
-- Existing code patterns
-- Reusable constants and code
+> [!WARNING]
+> Every "fix this" iteration costs tokens and money. 5-10 iterations = real money down the drain.
 
 ---
 
-## 🎯 Perfect For
+## The Contrast
 
-| Use Case | Why AISpec? |
-|----------|-------------|
-| **All AI Users** | Save 50-80% tokens by getting it right the first time |
-| **Vibe Coding** | Structure prevents AI from going off-track |
-| **Multiple AIs** | Same results with Claude, GPT, Cursor... |
-| **Team Projects** | Everyone follows the same rules |
-| **Legacy Code** | Discovers and respects existing patterns |
-| **Quality Focus** | Mandatory checks prevent mistakes |
-| **AI Beginners** | Learn best practices with guided structure |
-| **Cost Conscious** | Less iterations = less token costs |
-
----
-
-## 🔧 Features
-
-- ✅ **Universal Compatibility** — Any AI, any language, any framework, any architecture
-- ✅ **Dark/Light Theme** — Respects your VS Code theme
-- ✅ **One-Click Copy** — Generates and copies to clipboard
-- ✅ **7-Step Workflow** — With PLAN MODE and user approval at key points
-- ✅ **Rule Enforcement** — Copied into every single step (NO magic strings/numbers)
-- ✅ **Quality Checks** — REUSE, ARCHITECTURE, PERFORMANCE, SECURITY, etc.
-- ✅ **Conflict Resolution** — You choose which rules to follow
-- ✅ **Architecture Reminders** — Every step respects your design
-- ✅ **Greenfield Support** — Creates base structure first
-- ✅ **Brownfield Support** — Scans and respects existing patterns
-- ✅ **AI Agent Detection** — Auto-discovers CLAUDE.md, .cursorrules, .windsurfrules, etc.
+| | FREE FORM | AISPEC |
+|---|---|---|
+| **Flow** | Ask code → Fix → Fix → Fix | ✅ Plan → Test → Execute → Verify |
+| **Tests** | ❌ After (if any) | ✅ BEFORE (mandatory) |
+| **Coverage** | ❌ ~30% | ✅ **100%** |
+| **Rules** | ❌ Forgotten | ✅ **Embedded in every step** |
+| **Iterations** | ❌ 5-10 | ✅ **1-2** |
+| **Tokens** | ❌ 100% | ✅ **20-30%** |
+| **Time** | ❌ Hours | ✅ **Minutes** |
 
 ---
 
-## 📦 Requirements
+## The Solution
 
-- **VS Code** 1.85.0+
-- **Git** (optional, for branch/worktree features)
-- **Any AI assistant** — Claude, GPT, Gemini, Cursor, Windsurf, etc.
+**AISpec to the rescue**
+
+AISpec transforms your SDD [what to build] into a complete TDD [Test-Driven Development] workflow:
+
+- Creates a 7-step implementation workflow dynamically
+- Forces AI to respect every step you specify
+- Reduces 80-90% of tokens and time
+
+> SDD → AISpec → TDD (7 steps) → Done
+
+**No matter your level or seniority — AISpec brings a Senior Dev to every SDD you write.**
+
+> [!IMPORTANT]
+> You don't need to be senior to deliver senior-quality code. AISpec does the heavy lifting.
 
 ---
 
-## 📥 Installation
+## Who Is AISpec For?
 
-### From VS Code Marketplace (Recommended)
-1. Open VS Code
-2. Go to **Extensions** (`Cmd/Ctrl + Shift + X`)
-3. Search for **"AISpec"**
-4. Click **Install**
-5. Reload VS Code if prompted
+**Your AI has no agents defined?**  
+AISpec replaces missing roles:
+- Senior Developer → writes clean, tested code
+- Architect → enforces project structure
+- Senior QA → writes tests BEFORE code
+- Tech Lead → enforces conventions
+- Product Manager → validates acceptance criteria
+- Security Analyst → includes security checks
+- DevOps Engineer → validates deployments
+- Database Administrator → ensures data integrity
 
-**Don't see it in the marketplace?** The extension may still be in review. Use the VSIX method below.
+**Your AI already has agents?**  
+AISpec reinforces and optimizes the overall workflow.
 
-### From VSIX File (Manual Install)
+---
+
+## What Projects Is AISpec For?
+
+- **Greenfield (new projects)** — start with the right architecture from day one
+- **Brownfield (legacy projects)** — safely add features without breaking existing code
+
+---
+
+## The 7-Step Workflow
+
+```
+1. CONFIRM INPUT     → What + How
+2. SHOW RULES      → Project conventions
+3. GENERATE prompt-init.md → Brief + rules + test objectives
+4. SCAN PROJECT   → context.md with architecture snapshot
+5. GENERATE plan.md → Tests BEFORE code (KEY)
+6. IMPLEMENT      → TDD cycle: test → code → verify
+7. FINALIZE      → Tested code + PR
+```
+
+> [!IMPORTANT]
+> Each step has an approval gate. AI doesn't proceed until you say so.
+
+---
+
+## 📦 Installation
+
+### VS Code Marketplace
+`Cmd/Ctrl + Shift + X` → Search "AISpec" → Install
+
+### Command Line
 ```bash
-# 1. Download the .vsix file from GitHub releases
-# 2. Install via command line:
-code --install-extension aispec-0.0.17.vsix
-
-# Or install from VS Code:
-# Extensions → ... → Install from VSIX
+code --install-extension PonsMauro.aispec
 ```
 
-### Troubleshooting
-- **Not found in marketplace**: Install manually using VSIX file above
-- **Installation fails**: Check VS Code version (requires 1.85.0+)
-- **Extension not loading**: Reload VS Code window (`Cmd/Ctrl + Shift + P` → "Reload Window")
+### Requirements
+- VS Code 1.85.0+
+- Git (optional)
 
 ---
 
 ## 🚀 Quick Start
 
-1. Open VS Code → Click **AISpec** in the sidebar
-2. Fill the form:
-   - Project name & folder
-   - Feature name
-   - What & how (descriptions)
-   - Architecture (or leave blank for auto-detect)
-3. Click **Generate & Copy** 
-4. Paste into **any AI assistant**
-5. Watch it follow YOUR rules perfectly
+1. **Open** AISpec panel in VS Code sidebar
+2. **Fill** the form (project, feature, what, how)
+3. **Click** Generate
+4. **Copy** the prompt to your AI (Claude, Cursor, Windsurf, Copilot...)
+5. **Follow** the 7-step workflow
+6. **Approve** each step → Get tested code + PR
+
+> [!NOTE]
+> **Don't see the form?** Press `Cmd/Ctrl + Shift + P` → "Reload Window" to refresh VS Code.
+
+---
+
+## 🔑 What You Get
+
+**Location:** `{project}/aispec/{feature}/`
+
+| File | Purpose |
+|------|---------|
+| `prompt-init.md` | Brief + rules + test objectives |
+| `context.md` | Project snapshot + architecture |
+| `plan.md` | Steps with tests BEFORE code |
+
+---
+
+## 🌐 Works With
+
+- **AI Tools**: Claude, Cursor, Windsurf, Copilot, GPT, Gemini, any LLM
+- **Languages**: Python, JS, TS, Go, Rust, Java, C#, Ruby, PHP...
+- **Frameworks**: React, Vue, Django, FastAPI, Rails, Laravel, Spring...
+- **Architectures**: Hexagonal, Clean, Layered, Microservices...
+
+> [!IMPORTANT]
+> AISpec is a protocol, not a tool. The spec works with ANY AI execution layer.
 
 ---
 
 <p align="center">
-  <strong>Stop debugging AI mistakes. Start shipping.</strong><br/>
+  <strong>Stop hoping your AI follows rules. Make it follow a protocol.</strong><br/>
   <em>AISpec — Structure your AI development.</em>
 </p>
 
 <p align="center">
   <img src="images/better-prompts.png" alt="AISpec Plugin"/>
 </p>
+
+---
+
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=PonsMauro.aispec">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/PonsMauro.aispec?label=VS%20Code%20Marketplace&color=007ACC" alt="VS Code Marketplace"/>
+  </a>
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
+</p>
+
+---
+
+*MIT License — github.com/ponsmauro/aispec*
