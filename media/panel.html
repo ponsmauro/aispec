@@ -201,7 +201,7 @@
     .field { margin-bottom: 7px; }
     .field label { display: block; font-size: 10px; color: var(--acc); margin-bottom: 2px; }
     .field label .req  { color: var(--err); }
-    .field label .hint { font-size: 9px; opacity: .7; }
+    .field label .hint { font-size: 9px; opacity: .7; float: right; font-weight: normal; }
 
     .p-input {
       width: 100%;
@@ -639,13 +639,33 @@
           <div class="p-section">
             <div class="sec-label">Description</div>
             <div class="field">
-              <label>Functional <span class="req">*</span></label>
-              <textarea class="p-input" id="functionalDesc" placeholder="What it does, for whom, why... (or path to reference doc)"></textarea>
+              <label>Functional <span class="req">*</span> <span class="hint">(4 structured sections)</span></label>
+              <textarea class="p-input" id="functionalDesc" placeholder="## Current State
+What exists today, current behavior...
+
+## Problem Detected
+The problem or issue that needs solving...
+
+## Proposed Solution
+Suggested approach, SQLs, pseudocode...
+
+## Impact / Known Risks
+Known risks, ddl-auto=update, timeouts, etc..."></textarea>
               <div class="ferr" id="e-func">Required (min. 10 chars)</div>
             </div>
             <div class="field">
-              <label>Technical</label>
-              <textarea class="p-input" id="technicalDesc" placeholder="Stack, patterns, dependencies, API (swagger/openapi), etc... (or path to reference doc)"></textarea>
+              <label>Technical <span class="hint">(optional if functional is detailed)</span></label>
+              <textarea class="p-input" id="technicalDesc" placeholder="## Stack / Dependencies
+Languages, frameworks, libraries...
+
+## API Contracts
+Endpoints, request/response schema...
+
+## Architecture Notes
+Patterns to follow, architectural decisions...
+
+## External Integrations
+Third-party services, contracts..."></textarea>
             </div>
           </div>
 
@@ -749,6 +769,82 @@ This is a DISCOVERY and PLANNING phase:
 
 ---
 
+## ⚠️ GIT OPERATIONS — Critical Constraints
+
+🚫 **FORBIDDEN** (require explicit user approval):
+- `git commit`
+- `git push`
+- `git merge`
+- Creating PRs or MRs on any platform
+- Any command that modifies remote state
+
+✅ **ALLOWED without approval** (read-only operations):
+- `git status`
+- `git diff`
+- `git log`
+- `git branch` (list only)
+- `git show`
+- `git fetch`
+
+📋 **Local branch creation** (suggested, not required):
+- You may create a local branch for this feature
+- All work happens on the feature branch
+- Branch will be committed/pushed when you receive explicit approval
+
+⏸️ **Final approval required:**
+After all gates are passed and you have EXPLICIT user approval to commit,
+then you may execute: git commit, git push, and create PR.
+
+---
+
+## ⚡ CHALLENGE PROTOCOL — Surface Doubts Before Executing
+
+At EVERY step, BEFORE executing, check for:
+
+**1. INPUT CONTRADICTIONS**
+- User spec vs. existing patterns
+- Example: User says "use tabs" but project uses spaces
+
+**2. RULE CONFLICTS**
+- Declared rule vs. existing implementation
+- Example: "No magic numbers" but existing code has hardcoded values
+
+**3. UNMEASURABLE CRITERIA**
+- Acceptance criteria that cannot be verified
+- Example: "must be fast" without definition of fast
+
+**4. UNDEFINED BEHAVIOR**
+- Scenarios not covered in the specification
+- Example: "What happens if the API call fails?"
+
+When any of these is found, PRESENT BEFORE EXECUTING:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ⚠️ CHALLENGE DETECTED                                 │
+├─────────────────────────────────────────────────────────┤
+│ Type: [CONFLICT / UNDEFINED / UNMEASURABLE / OTHER]    │
+│                                                         │
+│ Description: [brief description of the issue]          │
+│                                                         │
+│ Found in spec:     [what user wrote]                     │
+│ Found in project: [what exists]                         │
+│ Evidence:          [file references if applicable]      │
+│                                                         │
+│ Recommendation: [suggested resolution]                  │
+│                                                         │
+│ ⏸️ STOPPED: Waiting for your decision                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+Do NOT:
+- ❌ Assume and continue
+- ❌ Pick a side silently
+- ❌ "Fix it later"
+- ❌ Skip without mentioning
+
+---
+
 ## PROGRESS CHECKLIST (Update as you go)
 - [ ] Step 1: Input Data Confirmed (Parts A, B, C)
 - [ ] Step 2: Rules Displayed & Understood
@@ -800,22 +896,82 @@ Ask: "Is this data correct? Let me know if you want to change anything (referenc
 
 ### Part B: Functional Description
 If {{functionalDesc}} contains a file path, READ that file first.
-Then REFINE and present clearly:
+Then PARSE and present each section clearly:
 
 ```
-## Functional Description (REFINED):
-[Rewrite to be clearer - fix typos, clarify intent]
-[Include key points from referenced docs]
+## Functional Description (4 SECTIONS):
+
+### 1. Current State
+[What exists today, current behavior - validated against code in Step 4]
+
+### 2. Problem Detected
+[What problem or issue needs solving]
+
+### 3. Proposed Solution
+[Suggested approach, SQLs, pseudocode, diagrams]
+
+### 4. Impact / Known Risks
+[Known risks like: ddl-auto=update, socket timeouts, connection limits, etc.]
 ```
+
+---
+
+**⚠️ APPROVAL BY SECTION — Easier validation**
+
+With 4 sections, approval becomes granular:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PART B: FUNCTIONAL DESCRIPTION - APPROVAL                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ Section 1: Current State           [ ] Approved            │
+│ Section 2: Problem Detected       [ ] Approved            │
+│ Section 3: Proposed Solution    [ ] Approved            │
+│ Section 4: Impact / Known Risks  [ ] Approved            │
+│                                                             │
+│ [ ] Approve all                                            │
+│ [ ] Request changes (specify section)                      │
+│                                                             │
+│ ⏸️ WAITING FOR APPROVAL...                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**📋 FAILURE SCENARIOS — Feed into Test Approval Gate**
+
+The Problem Detected section helps identify failure scenarios:
+
+Ask the user:
+> "Based on the Problem Detected, confirm failure scenarios:
+>
+> 1. What happens if an **external dependency** fails?
+> 2. What happens if **data is invalid or missing**?
+> 3. What happens if a **resource is unavailable**?
+> 4. What happens in **concurrent scenarios**?
+> 5. Are there **known risks** from Section 4 we should handle?"
+
+Document confirmed failures (these feed into Step 5.1 Test Approval Gate):
+```
+## Failure: [scenario description]
+- Trigger: [what causes it]
+- Expected behavior: [what should happen]
+```
+
+---
 
 **If user says "not correct" or wants changes:**
-→ Ask: "What should be different?"
+→ Ask: "Which section should be different?"
 → Update and show again
 → Wait for approval
 
 **Checklist Part B:**
-- [ ] 1. Description refined and clear
-- [ ] 2. User approved
+- [ ] 1. Current State clear
+- [ ] 2. Problem Detected clear
+- [ ] 3. Proposed Solution clear
+- [ ] 4. Impact / Known Risks documented
+- [ ] 5. User approved (by section)
 
 ✅ All OK! → **WAIT for user approval.**
 
@@ -886,9 +1042,45 @@ Display all rules that must be followed throughout the project.
 - ✅ Use ✅ for required, ❌ for forbidden
 - ✅ Wait for user approval to confirm understanding
 
+**Conflict Detection:**
+If you find conflicting rules (e.g., one file says "use spaces" and another says "use tabs"), present using this format:
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│ ⚠️ CONFLICT DETECTED                                             │
+├───────────────────────────────────────────────────────────────────┤
+│ CONFLICT #[N]: [brief description]                               │
+│                                                                   │
+│ ┌─ Source A ──────────────────────────────────────────────────┐ │
+│ │ File:     [file:line]                                       │ │
+│ │ Rule:     "[exact rule text]"                              │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│ ┌─ Source B ──────────────────────────────────────────────────┐ │
+│ │ File:     [file:line]                                       │ │
+│ │ Rule:     "[exact rule text]"                              │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│ Analysis:                                                         │
+│ - [Which is more specific and why]                               │
+│ - Prevalence in codebase: [statistics]                          │
+│                                                                   │
+│ Recommendation: Follow [A/B] because [reason]                    │
+│                                                                   │
+│ Options:                                                         │
+│   [1] Accept recommendation                                     │
+│   [2] Follow Source A only                                      │
+│   [3] Follow Source B only                                       │
+│   [4] Define a new rule: [propose]                             │
+│                                                                   │
+│ ⏸️ WAITING for selection...                                     │
+└───────────────────────────────────────────────────────────────────┘
+```
+
 **Checklist:**
 - [ ] 1. All rules displayed
-- [ ] 2. User approved understanding
+- [ ] 2. Conflicts presented (if any)
+- [ ] 3. User approved understanding
 
 ✅ All OK! → **WAIT for user approval.**
 
@@ -1113,59 +1305,172 @@ Create the implementation plan with rules copied into each step.
 
 **Action**: Create plan.md at `{{project}}/{{specsFolder}}/{{featureName}}/plan.md`
 
-**Output** (this is what you must write to the file):
+**Each step MUST follow this exact format:**
+
 ```
-# Plan - {{featureName}}
+### Step N: [name] — complexity: [LOW|MEDIUM|HIGH]
 
-See context.md for complete information.
+**Purpose:** 
+[1-2 sentences: what this step accomplishes]
 
-## Implementation Steps
+**Implementation:**
+- [Specific action 1]
+- [Specific action 2]
 
-{{#isNewProject}}
-### Step 1: Create base project structure
-- Description: Set up initial project structure based on tech stack ({{techStack}})
-- Rules: Follow best practices for {{architecture}} architecture
-- Context: Reference context.md for recommended structure
-- Include: package.json/go.mod, basic folders, .gitignore, initial configs
-- Acceptance: Project compiles/runs basic command
-- Dependencies: None
+**Rules (copied inline — NEVER referenced):**
+- [EXACT rule text] [from: source file]
+- [EXACT rule text] [from: source file]
 
-{{/isNewProject}}
-### {{#isNewProject}}2{{/isNewProject}}{{^isNewProject}}1{{/isNewProject}}: [Name]
-- Description: [what this step does]
-- Rules (from prompt-init.md): [COPY rules HERE - not at top]
-- Context: [reference context.md if needed]
-- Checks: REUSE, ARCHITECTURE ({{architecture}}), PERFORMANCE, {{#isNewProject}}GREENFIELD{{/isNewProject}}{{^isNewProject}}BROWNFIELD{{/isNewProject}}, CONSISTENCY, SECURITY
-- Acceptance: [measurable result]
-- Dependencies: [what must be done first]
+**Pre-flight Checks:**
+- [ ] REUSE: Search existing code first — found: [what/references]
+- [ ] ARCHITECTURE: Complies with [architecture]? [YES/NO — explain]
+- [ ] PERFORMANCE: [issue to check]? [YES/NO/NA]
+- [ ] BROWNFIELD: What else uses this? [existing consumers]
+- [ ] CONSISTENCY: Matches existing patterns? [YES/NO — explain]
+- [ ] SECURITY: Input validation? [YES/NO — what]
 
-### Step {{#isNewProject}}3{{/isNewProject}}{{^isNewProject}}2{{/isNewProject}}: [Name]
-... (same structure)
+**Acceptance Criteria:**
+[Specific, measurable, verifiable]
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+
+**Dependencies:**
+- Requires: [prior step N or none]
+- Required by: [step N+1]
 ```
 
 **Instructions for this step:**
-1. Rules must be copied INTO each step (NOT at the top)
+1. Rules must be copied INTO each step (NOT at the top, NOT referenced)
 2. Reference context.md for additional info
 3. If new info found → update context.md first
 4. Each step must have all fields filled
+5. At least one rule must be copied (never just reference "prompt-init.md")
 {{#isNewProject}}
-5. FIRST step must create base project structure
-6. SECOND step onwards implement the feature{{/isNewProject}}
+6. FIRST step must create base project structure
+7. SECOND step onwards implement the feature{{/isNewProject}}
 
 ⚠️ IMPORTANT:
 - ❌ WRONG: "Follow rules in prompt-init.md"
-- ✅ CORRECT: Copy actual rule: "MUST use camelCase for functions"
+- ❌ WRONG: "Use best practices"
+- ✅ CORRECT: "MUST use camelCase for exported functions [from: src/utils/helpers.go:15]"
+- ✅ CORRECT: "MUST validate input is non-null [from: AGENTS.md:23]"
 
 **Checklist:**
 - [ ] 1. Doubts clarified by re-reading project
 - [ ] 2. New info added to context.md
 - [ ] 3. context.md referenced
-- [ ] 4. Rules copied INTO each step
-- [ ] 5. REUSE considered for each step - "Does this already exist? Can I reuse?"
-- [ ] 6. ARCHITECTURE compliance verified for each step - "Does this comply with {{architecture}}?"
+- [ ] 4. Rules copied INTO each step (not referenced)
+- [ ] 5. REUSE considered for each step
+- [ ] 6. ARCHITECTURE compliance verified for each step
 - [ ] 7. plan.md created
 
 ✅ All OK! → **Show summary and WAIT for user approval.**
+
+---
+
+## STEP 5.1: TESTS GENERATION CHOICE
+
+**Before starting implementation, user choice is required:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ GENERATION OPTIONS                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                     │
+│ Do you want to generate tests?                         │
+│                                                     │
+│ [ ] Yes, full TDD (tests + code)                  │
+│   - Test Approval Gate (Step 5.1) will execute      │
+│   - Tests written first → then code               │
+│   - Coverage target: 100% (80% mínimo)          │
+│                                                     │
+│ [ ] Code only, no tests                          │
+│   - Skip Test Approval Gate                        │
+│   - Write code directly                         │
+│   - No test coverage requirements              │
+│                                                     │
+│ ⏸️ WAITING FOR SELECTION...                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**If user selects "Code only, no tests":**
+→ Skip to Step 6A with simplified workflow
+→ No TDD cycle
+→ Continue to Step 6B for validation
+
+**If user selects "Yes, full TDD":**
+→ Proceed to Test Approval Gate (below)
+
+---
+
+## STEP 5.1: TEST APPROVAL GATE
+
+**CRITICAL: After plan.md is created, you MUST get user approval for test enumeration BEFORE implementing.**
+
+**Each layer/component requires test enumeration approval:**
+
+**⚠️ CRITICAL: Edge cases reveal FALLBACK behavior when errors occur. These are REQUIRED for production stability.**
+
+For each step/feature in plan.md:
+
+1. **Identify the layer** being implemented (e.g., AuthService, UserRepository)
+2. **Enumerate ALL test combinations** for that layer:
+   - ✅ Happy paths (all valid inputs)
+   - ❌ Failure paths (invalid inputs, missing data, timeouts, external failures)
+   - ⚠️ **Edge cases (CRITICAL - define fallback behavior)**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ TEST APPROVAL GATE ��� [LayerName]                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ Proposed Unit Tests (N total):                               │
+│                                                             │
+│ ✅ Happy Path (Core):                                        │
+│   1. valid_credentials → JWT                              │
+│   2. refresh_token → new_JWT                              │
+│                                                             │
+│ ❌ Failure (Error Handling - REQUIRED):                    │
+│   3. invalid_password → 401                             │
+│   4. missing_token → 401                                │
+│   5. expired_token → 401                                │
+│   6. rate_limit_exceeded → 429                           │
+│   7. timeout → fallback behavior                        │
+│   8. external_API_failure → graceful degradation      │
+│                                                             │
+│ ⚠️ Edge Cases (FALLBACK Behavior - CRITICAL):             │
+│   9. empty_credentials → 400                           │
+│   10. whitespace_only → validation behavior            │
+│   11. concurrent_requests → race condition handling  │
+│   12. partial_data → graceful degradation             │
+│                                                             │
+│ ⚠️ IMPORTANT: Edge cases = what happens when things go    │
+│    wrong in production. Without these, system may behave    │
+│    unexpectedly under unexpected conditions.              │
+│                                                             │
+│ ──────────────────────────────────────────────               │
+│                                                             │
+│ Options:                                                   │
+│   [ ] Approve and implement tests                            │
+│   [ ] Add test case (specify scenario)                  │
+│   [ ] Remove test case                                  │
+│   [ ] Request discussion on fallback behavior         │
+│                                                             │
+│ ⏸️ WAITING FOR APPROVAL...                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**IMPORTANT:**
+- Enumerate ALL combinations for each layer
+- User MUST approve test list BEFORE writing test code
+- Tests are written ONLY after approval (Step 6A)
+
+**Checklist:**
+- [ ] 1. All layers identified from plan.md
+- [ ] 2. Test cases enumerated for each layer
+- [ ] 3. User approved test enumeration
+
+✅ Test enumeration approved! → **Proceed to Step 6A.**
 
 ---
 
@@ -1180,38 +1485,263 @@ Question: "Do you want to validate each development stage?"
 
 ---
 
-### Step 6A: WRITE CODE
-**For each step in plan.md:**
-1. Read prompt-init.md, context.md for this step
-2. Copy rules INTO your implementation (MANDATORY - write them in code comments)
-3. Write code
-4. **CRITICAL: Replace all magic strings and magic numbers with named constants**
-   - Search for hardcoded strings (error messages, URLs, keys, etc.)
-   - Search for hardcoded numbers (timeouts, limits, sizes, etc.)
-   - **FIRST: Check if a constant already exists that you can reuse**
-   - If no existing constant, create a new one with descriptive name
-5. Write tests that verify BEHAVIOR (not just coverage):
-   - Tests should fail if functionality changes incorrectly
-   - Focus on "what should happen" not "what should not happen"
-   - Each test should have a clear purpose tied to the feature requirements
-6. Log what was done in plan.md
+## ⚡ DRY RUN — Before State-Modifying Commands
 
-**Checklist for Step 6A:**
-- [ ] 1. Read prompt-init.md for this step
-- [ ] 2. Rules copied into code (as comments, not referenced)
-- [ ] 3. Code written
-- [ ] 4. **Magic strings/numbers replaced with named constants**
-- [ ] 5. Tests written that verify BEHAVIOR (not just coverage)
-- [ ] 6. Logged in plan.md
+Before executing any command that modifies state (build, test, deploy, etc.):
+
+1. **SHOW what you WILL execute:**
+   ```
+   $ [command to run]
+   ```
+
+2. **Ask:** "Ready to proceed? [YES/NO]"
+
+3. **After approval:** Execute and show output
 
 ---
 
-### Step 6B: VALIDATE
+### Step 5.1: TEST APPROVAL GATE (Required)
+
+**IMPORTANT: Before writing ANY code or tests, you MUST enumerate and get approval for ALL unit tests.**
+
+**CRITICAL: Edge cases reveal fallback behavior when errors occur. These are REQUIRED for proper error handling.**
+
+For each layer/component to be implemented, generate a complete enumerated list:
+
+```
+📋 PROPOSED UNIT TESTS — Layer: [LayerName]
+═════════════════════════════════════════════════════
+
+For each functionality of this layer, enumerate ALL combinations:
+
+#### ✅ Happy Path Tests (Core Functionality)
+1. [test_name]: Given [valid input] When [action] Then [expected result]
+2. [test_name]: Given [valid input variations] When [action] Then [expected result]
+
+#### ❌ Failure Tests (Error Handling - REQUIRED)
+These define FALLBACK behavior when errors occur:
+3. [test_name]: Given [invalid input] When [action] Then [error handling]
+4. [test_name]: Given [missing input] When [action] Then [error handling]
+5. [test_name]: Given [null/nil input] When [action] Then [error handling]
+6. [test_name]: Given [expired token] When [action] Then [error handling]
+7. [test_name]: Given [invalid credentials] When [action] Then [error handling]
+8. [test_name]: Given [rate limit exceeded] When [action] Then [error handling]
+9. [test_name]: Given [timeout] When [action] Then [fallback behavior]
+10. [test_name]: Given [external API failure] When [action] Then [fallback behavior]
+
+#### ⚠️ Edge Cases (CRITICAL - Fallback Behavior)
+These reveal how the system handles edge conditions:
+11. [test_name]: Given [empty input] When [action] Then [result]
+12. [test_name]: Given [whitespace only] When [action] Then [result]
+13. [test_name]: Given [max length] When [action] Then [result]
+14. [test_name]: Given [special characters] When [action] Then [result]
+15. [test_name]: Given [concurrent requests] When [action] Then [fallback handling]
+16. [test_name]: Given [partial data] When [action] Then [fallback behavior]
+
+⚠️ IMPORTANT: Edge cases = fallback behavior when things go wrong.
+             Without these, you don't know what happens in production!
+
+Coverage Target: 100% (80% mínimo)
+```
+
+**This step MUST enumerate ALL possible test cases for each layer BEFORE proceeding.**
+
+**User approval required:**
+```
+┌─────────────────────────────────────────────┐
+│ TEST APPROVAL GATE                            │
+│                                             │
+│ Tests enumerated for [LayerName]: N tests       │
+│                                             │
+│ [ ] Approve test enumeration              │
+│ [ ] Add test case                         │
+│ [ ] Remove test case                    │
+│                                             │
+│ ⏸️ WAITING for test approval...          │
+└─────────────────────────────────────────────┘
+```
+
+⚠️ IMPORTANT: Do NOT write any test code yet. Only enumerate test cases.
+   - Get user approval for the test enumeration first
+   - Then proceed to Step 6A to write tests
+
+✅ Tests approved! → **Proceed to Step 6A.**
+
+---
+
+### Step 6A: WRITE CODE
+
+**Two workflows based on user choice:**
+
+---
+
+#### ⚠️ OPTION A: Full TDD (tests + code)
+
+**TDD PRINCIPLE: Tests are the specification of behavior, not a coverage metric.**
+
+For each step in plan.md:
+
+**Phase 1: GENERATE TESTS FROM SPEC (TDD-style)**
+1. Read prompt-init.md, context.md for this step
+2. Read the functional description (Step 1 Part B) and failure scenarios
+3. Read the APPROVED test enumeration from Step 5.1
+4. **Generate test code for approved test cases:**
+   - Tests describe **expected behavior** from the spec
+   - Tests are derived FROM the specification, not FROM the code
+   - Tests validate WHAT the code should do, not that code exists
+
+> [!IMPORTANT]
+> Tests MUST be written FIRST (red phase), then code (green phase).
+
+---
+
+#### ⚠️ OPTION B: Code only (no tests)
+
+**Direct code implementation without test generation.**
+
+For each step in plan.md:
+
+**Phase 1: IMPLEMENT CODE**
+1. Read prompt-init.md, context.md for this step
+2. Read the functional description (Step 1 Part B)
+3. **Write code directly:**
+   - Code implements the expected behavior
+   - No test-first approach
+
+> [!NOTE]
+> Coverage targets do not apply in code-only mode.
+
+```
+📋 TDD TESTS — Writing Approved Tests
+═════════════════════════════════════════════
+
+Writing tests for: [LayerName]
+Based on approved enumeration (Step 5.1):
+
+[Test code for each approved test case]
+```
+📋 TDD TESTS — Generated from Functional Spec
+══════════════════════════════════════════════
+
+Tests for [Step N: name]:
+
+1. [TEST-NAME]: [What behavior is expected]
+   Given: [precondition]
+   When: [action]
+   Then: [expected result]
+
+2. [TEST-NAME]: [Failure scenario from Step 1B]
+   Given: [precondition]
+   When: [action that triggers failure]
+   Then: [expected failure behavior]
+
+... (generate all tests from functional spec + failure scenarios)
+```
+
+**Phase 2: WRITE CODE UNTIL TESTS PASS**
+4. After tests are generated and approved:
+   - Write code
+   - **Run tests**: tests should FAIL initially (expected)
+   - Continue writing code until ALL tests pass
+   - Tests passing = code satisfies the spec
+
+**Phase 3: FUNCTIONAL VIEW**
+5. **Document the expected behavior:**
+
+```
+📋 FUNCTIONAL VIEW — [Step N: name]
+══════════════════════════════════════════════
+
+Expected behavior at code level:
+- [What triggers what]
+- [Data flow]
+
+⚠️ FALLBACK PATHS — Document each failure scenario:
+────────────────────────────────────────────────
+For each failure point:
+- If [condition]: [current spec says X]
+- If [condition]: [UNDEFINED - must define]
+
+[UNDEFINED] items BLOCK advancement to 6B:
+  - [#UNDEF-001]: [scenario] — [question to resolve]
+  - [#UNDEF-002]: [scenario] — [question to resolve]
+
+✅ READY FOR 6B? [User must confirm each UNDEFINED resolved]
+```
+
+6. **CRITICAL: Replace all magic strings and magic numbers with named constants**
+7. Log what was done in plan.md
+
+**TDD vs Coverage-driven:**
+```
+❌ COVERAGE-DRIVEN (WRONG):
+   - Write code first
+   - Generate tests to reach 100% coverage (80% mínimo)
+   - Tests verify code exists, not behavior
+
+✅ TDD-STYLE (CORRECT):
+   - Read functional spec
+   - Generate tests from spec (tests FAIL first)
+   - Write code until tests pass
+   - Tests verify behavior matches spec
+```
+
+**Checklist for Step 6A (Option A - Full TDD):**
+- [ ] 1. Read functional spec (Step 1 Part B + failure scenarios)
+- [ ] 2. Tests generated FROM spec (not from code)
+- [ ] 3. Tests FAIL initially (expected in TDD)
+- [ ] 4. Code written until all tests pass
+- [ ] 5. Coverage >= 80% (target 100%)
+- [ ] 6. Functional view documented
+- [ ] 7. All [UNDEFINED] items resolved by user
+- [ ] 8. Rules copied into code (as comments, not referenced)
+- [ ] 9. **Magic strings/numbers replaced with named constants**
+- [ ] 10. Logged in plan.md
+
+**Checklist for Step 6A (Option B - Code only):**
+- [ ] 1. Read functional spec (Step 1 Part B)
+- [ ] 2. Code written directly
+- [ ] 3. Functional view documented
+- [ ] 4. All [UNDEFINED] items resolved by user
+- [ ] 5. Rules copied into code (as comments, not referenced)
+- [ ] 6. **Magic strings/numbers replaced with named constants**
+- [ ] 7. Logged in plan.md
+
+---
+
+### Step 6B: VALIDATE — TECHNICAL VIEW
+
+**Mode A (Full TDD):** Tests were generated in Step 6A. This step validates quality.
+
+**Mode B (Code only):** Direct validation without test execution.
+
 **For each step in plan.md:**
-1. **Verify NO magic strings or magic numbers remain in code**
-2. Run ALL available review tools in this project (linters, formatters, type checkers, security scanners, static analyzers, etc.)
-3. IF all review tools pass → Run tests
-4. Verify REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
+
+1. **Show TECHNICAL VIEW:**
+
+```
+📊 TECHNICAL VIEW — [Step N: name]
+══════════════════════════════════════════════
+
+Files modified:
+  + [new file]
+  ~ [modified file]
+  - [deleted file] (in system trash, recoverable)
+
+🔧 TOOL OUTPUT (real output only)
+─────────────────────────────────
+$ [command run]
+[actual output]
+
+If tool not configured → state "[TOOL] not configured" and skip
+DO NOT invent or fabricate tool output.
+```
+
+2. **Run validation:**
+   - Verify NO magic strings or magic numbers remain in code
+   - Run ALL available review tools (linters, formatters, type checkers, etc.)
+   - IF all review tools pass → Run tests (from Step 6A)
+   - Verify: REUSE, PERFORMANCE, BROWNFIELD, CONSISTENCY, SECURITY
 
 **⚠️ IMPORTANT: Test Quality Over Coverage**
 - ❌ WRONG: Write tests just to increase coverage percentage
@@ -1224,13 +1754,12 @@ Question: "Do you want to validate each development stage?"
   - Discuss the change with the user
 
 **Evidence required (show output before marking done):**
-- [ ] Run available review tools in this project (lint, test, typecheck, security, etc.)
-- [ ] Show actual output of each tool that exists
-- [ ] If tool doesn't exist → state "X not configured" and skip
+- [ ] Run available review tools (show actual output)
+- [ ] If tool doesn't exist → state "[TOOL] not configured" and skip
 - [ ] DO NOT invent tools that don't exist
 
 **Checklist for Step 6B:**
-- [ ] 1. **No magic strings/numbers in code - all replaced with named constants**
+- [ ] 1. **No magic strings/numbers in code**
 - [ ] 2. All review tools passed (list which tools ran)
 - [ ] 3. Tests written that verify BEHAVIOR (not just coverage)
 - [ ] 4. Tests passed (if tests fail due to functionality change → STOP and ask user)
@@ -1241,75 +1770,177 @@ Question: "Do you want to validate each development stage?"
 - [ ] 9. CONSISTENCY checked
 - [ ] 10. SECURITY checked
 
-⚠️ IMPORTANT: You must complete Step 6A before Step 6B. Both steps require user validation.
+⚠️ IMPORTANT: 
+- Step 6A has 3 phases: Tests → Code → Functional View
+- Tests are generated BEFORE code (TDD-style)
+- Code is written UNTIL tests pass
+- Step 6B validates quality after tests pass
 
-**WAIT for approval between steps (if user chose YES)**
+**WAIT for approval between steps**
 
 ---
 
-## STEP 7: FINALIZE
-Complete the project with QA and PR.
+## STEP 7: FINALIZE — Sequential Gates
 
-**Action**:
-1. Run full QA (tests, linters, type checks, security scan, static analysis)
-2. Scan {{docsFolder}}/ directory and ALL .md files in project to understand what documentation exists, then generate relevant docs
-3. If the feature adds/modifies an API → generate or update API specification (Swagger/OpenAPI, GraphQL schema, ProtoBuf, etc.)
-4. If the feature affects external integrations → document them
-5. Create PR
+⚠️ Each gate requires user approval before proceeding.
+
+---
+
+### STATE SUMMARY
+
+Before each gate, provide this summary:
+
+```
+═══════════════════════════════════════════════
+📊 PROJECT STATE
+═══════════════════════════════════════════════
+Steps completed: N/7
+Files changed: [+N] [~N] [-N]
+Open [UNDEFINED]: N
+Last gate passed: [step name]
+Feature complete: [YES/NO]
+═══════════════════════════════════════════════
+Ready to proceed? [User approval required]
+```
+
+---
+
+### GATE 7.1: Full QA
+
+**Action:** Run all quality tools (dry run first)
+
+```
+$ [test command]
+[actual output]
+
+$ [lint command]
+[actual output]
+
+$ [typecheck command]
+[actual output]
+```
+
+If tool not configured → state "[TOOL] not configured" and skip
+
+**Show summary:**
+- Tests: X passed, Y failed
+- Lint: Z issues
+- Typecheck: [clean/issues]
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.1: QA Results                        │
+│                                             │
+│ [ ] All tools passed                        │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.2: Documentation (Suggested)
+
+**Action:** Scan docs and suggest updates
+
+⚠️ These are suggestions only — proceed regardless of completion.
+
+```
+Suggested documentation updates:
+- [ ] Update [file.md] (if exists)
+- [ ] Update API specs (if API changed)
+- [ ] Update integration docs (if applicable)
+
+If no existing docs folder → ask user where to create documentation
+```
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.2: Documentation                     │
+│                                             │
+│ [ ] Documentation reviewed (if applicable)  │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.3: Show Final Changes
+
+**Action:** Show what will be committed
+
+```
+═══════════════════════════════════════════════
+📋 FINAL CHANGES SUMMARY
+═══════════════════════════════════════════════
+
+Files created:
+  + [file1]
+  + [file2]
+
+Files modified:
+  ~ [file3]
+  ~ [file4]
+
+Files deleted (in system trash):
+  - [file5] (recoverable from system trash)
+
+Total: +N files, ~N files, -N files
+
+═══════════════════════════════════════════════
+```
+
+┌─────────────────────────────────────────────┐
+│ GATE 7.3: Changes Review                   │
+│                                             │
+│ [ ] User reviewed all changes               │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
+
+---
+
+### GATE 7.4: Commit & Push
+
+⚠️ This is the ONLY gate where user approval is REQUIRED for git operations.
+
+**Suggested commit message:**
+```
+[type]: [feature-name]{{#issueTracker}} [{{issueTracker}}]{{/issueTracker}}
+```
+
+**For this step, you have EXPLICIT user approval to:**
+- ✅ `git add` (stage changes)
+- ✅ `git commit` (create local commit)
+- ✅ `git push` (push to remote)
+- ✅ Create PR/MR on GitHub/GitLab/etc.
+
+**If user does NOT approve:**
+→ All changes remain staged/unstaged locally
+→ Do NOT commit, push, or create PR
+→ User can manually handle git operations
+
+---
 
 {{#isNewProject}}
----
+### GATE 7.5: New Project Setup
 
-## STEP 7B: SETUP NEW PROJECT (Greenfield)
 Since this is a NEW project, create the initial setup for future development.
 
-**Action**:
-1. Create AI agent configuration file (choose one or more based on the tech stack):
-   - AGENTS.md (for AI agents)
-   - CLAUDE.md (for Claude)
-   - .cursorrules (for Cursor)
-   - .windsurfrules (for Windsurf)
-   - CONVENTIONS.md (project conventions)
+**Suggested actions:**
+1. Create AI agent configuration file (optional):
+   - AGENTS.md, CLAUDE.md, .cursorrules, .windsurfrules, CONVENTIONS.md
 
-2. Create initial documentation:
-   - README.md (project overview, tech stack, how to run)
-   - CONTRIBUTING.md (how to contribute)
-   - .gitignore (appropriate for the tech stack)
-   - Any other essential project files
+2. Create initial documentation (optional):
+   - README.md
+   - CONTRIBUTING.md
+   - .gitignore
 
-3. Initialize git repository if not already done
-
-**Output** (create these files):
-```
-# AGENTS.md
-
-## Project Overview
-- Name: {{project}}
-- Tech Stack: {{techStack}}
-- Architecture: {{architecture}}
-
-## Development Rules
-[Rules for AI agents working on this project]
-
-## Commands
-[How to run tests, build, etc.]
-```
-
-```
-# README.md
-
-# {{project}}
-
-## Tech Stack
-{{techStack}}
-
-## Getting Started
-[How to set up and run the project]
-
-## Architecture
-{{architecture}}
-```
+┌─────────────────────────────────────────────┐
+│ GATE 7.5: Project Setup                     │
+│                                             │
+│ [ ] Setup suggestions reviewed              │
+│ [ ] User approves to proceed                │
+└─────────────────────────────────────────────┘
 {{/isNewProject}}
+
+---
+
+### FINAL CHECKLIST
 
 **Instructions for this step:**
 1. All steps must show [x] completed in plan.md
@@ -1335,8 +1966,57 @@ Since this is a NEW project, create the initial setup for future development.
 - [ ] 7. AI agent config created (AGENTS.md, CLAUDE.md, etc.)
 - [ ] 8. Project documentation created (README.md, CONTRIBUTING.md){{/isNewProject}}
 - [ ] {{#isNewProject}}9{{/isNewProject}}{{^isNewProject}}7{{/isNewProject}}. PR created
+>>>>>>> origin/main
 
-✅ All OK! → **WAIT for user approval for merge.**
+┌─────────────────────────────────────────────────────────────┐
+│ ✅ FEATURE COMPLETE                                         │
+├─────────────────────────────────────────────────────────────┤
+│ □ All plan steps completed [x]                              │
+│ □ Tests passing                                            │
+│ □ Linters/type checkers clean                              │
+│ □ Security scan passed (if configured)                     │
+│ □ Documentation updated (if applicable)                     │
+│ □ Changes committed and pushed (if approved)                │
+│ □ PR/MR created (if approved)                              │
+│                                                             │
+│ {{#issueTracker}}□ Jira linked: [{{issueTracker}}]{{/issueTracker}}         │
+│                                                             │
+│ ⏸️ READY FOR MERGE APPROVAL                               │
+└─────────────────────────────────────────────────────────────┘
+
+---
+
+## ⚠️⚠️⚠️ FINAL REMINDER — FOLLOW ALL STEPS ⚠️⚠️⚠️
+
+This prompt contains EXPLICIT instructions that MUST be followed in ORDER:
+
+```
+═══════════════════════════════════════════════════════════════════
+📋 MANDATORY EXECUTION CHECKLIST
+═══════════════════════════════════════════════════════════════════
+
+□ Read ALL instructions before starting
+□ Follow steps in ORDER (1 → 2 → 3 → 4 → 5 → 6 → 7)
+□ Wait for approval at EVERY gate
+□ Copy rules INTO each step (never reference them)
+□ Execute ALL checks (REUSE, ARCHITECTURE, PERFORMANCE, etc.)
+□ Do NOT skip any step
+□ Do NOT assume behavior — ask when undefined
+□ Do NOT commit, push, or create PR without explicit user approval
+□ Use DRY RUN before executing state-modifying commands
+□ Move deleted files to system trash (recoverable)
+□ Surface CHALLENGES before executing, not after
+
+FAILURE TO FOLLOW THESE INSTRUCTIONS WILL RESULT IN:
+- Incorrect implementation
+- Missed requirements
+- Wasted time and tokens
+- User dissatisfaction
+
+Your job is to FOLLOW these instructions, not to bypass them.
+
+═══════════════════════════════════════════════════════════════════
+```
 
 ---
 
@@ -1346,6 +2026,7 @@ Since this is a NEW project, create the initial setup for future development.
 - Numbered lists (1., 2., 3.)
 - Checkboxes ([ ] not started, [x] completed)
 - Headers (### Step N)
+- Use box-drawing characters for tables and cards
 
 ### FEEDBACK LOOP
 - User says "no/wrong" → STOP, ask what's wrong, fix
