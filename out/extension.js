@@ -52,8 +52,10 @@ class AISpecSidebarProvider {
         const isDark = themeKind === vscode.ColorThemeKind.Dark || themeKind === vscode.ColorThemeKind.HighContrast;
         webviewView.webview.html = this.getHtmlContent(webviewView.webview, isDark);
         webviewView.webview.onDidReceiveMessage((message) => {
+            console.log('[AISpec] Message received:', message);
             switch (message.type) {
                 case 'pickFolder': {
+                    console.log('[AISpec] pickFolder requested, targetId:', message.targetId);
                     vscode.window.showOpenDialog({
                         canSelectFolders: true,
                         openLabel: 'Select folder',
