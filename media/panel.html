@@ -2046,6 +2046,13 @@ Don't report: successful completions in detail
 </script>
 
 <script nonce="{{nonce}}">
+  // AISpec initialization
+  console.log('[AISpec] Script loading...');
+  window.onerror = function(msg, url, line) {
+    console.error('[AISpec] Error:', msg, 'at line', line);
+    return false;
+  };
+  
   const baseTags = [
     { id:'bug', cls:'r' },
     { id:'documentation', cls:'g' },
@@ -2075,8 +2082,10 @@ Don't report: successful completions in detail
   ];
 
   const vscode = acquireVsCodeApi();
+  console.log('[AISpec] VSCode API loaded:', !!vscode);
 
 function pickDir(targetId) {
+    console.log('[AISpec] pickDir called with targetId:', targetId);
     vscode.postMessage({ type: 'pickFolder', targetId });
   }
 
