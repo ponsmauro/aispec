@@ -2,7 +2,7 @@
   "name": "aispec",
   "displayName": "AISpec",
 "description": "AI Feature Development Assistant - Generate structured 7-step plans that ANY AI agent follows perfectly. Rules in every step, quality checks, architecture enforcement.",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "publisher": "PonsMauro",
   "repository": "https://github.com/ponsmauro/aispec",
   "engines": {
